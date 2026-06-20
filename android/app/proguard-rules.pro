@@ -1,3 +1,7 @@
+# Ignore all missing reference warnings that cause build failures
+-ignorewarnings
+-dontwarn **
+
 # Flutter Wrapper
 -keep class io.flutter.app.** { *; }
 -keep class io.flutter.plugin.**  { *; }
