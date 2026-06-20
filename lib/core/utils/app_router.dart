@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../features/sync/screens/app_sync_screen.dart';
 import '../../features/notifications/presentation/notifications_screen.dart';
-
 import '../../features/home/presentation/home_screen.dart';
 import '../../features/payments/presentation/qr_scanner_screen.dart';
 import '../../features/payments/presentation/receive_money_screen.dart';
+import '../../features/payments/presentation/radio_transfer_screen.dart';
 
 class AppRouter {
   static final router = GoRouter(
@@ -49,6 +49,10 @@ class AppRouter {
       GoRoute(
         path: '/receive-money',
         builder: (context, state) => const ReceiveMoneyScreen(),
+      ),
+      GoRoute(
+        path: '/radio',
+        builder: (context, state) => const RadioTransferScreen(),
       ),
     ],
   );

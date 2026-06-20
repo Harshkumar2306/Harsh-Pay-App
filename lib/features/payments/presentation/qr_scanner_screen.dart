@@ -134,7 +134,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
 
       final result = await ApiClient().payOnline(
         senderClerkId: wallet.clerkId,
-        receiverClerkId: payload['id'] ?? '',
+        receiverClerkId: payload['clerkId'] ?? '',
         amount: amount,
         note: 'Sent to ${payload['name']}',
       );
@@ -187,7 +187,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
     await HiveSetup.saveWallet(wallet);
 
     final txId = const Uuid().v4();
-    final receiverId = payload['id'] ?? 'unknown';
+    final receiverId = payload['clerkId'] ?? 'unknown';
 
     final tx = OfflineTransaction(
       txId: '$txId::$receiverId',

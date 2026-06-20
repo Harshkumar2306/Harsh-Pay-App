@@ -481,11 +481,7 @@ class _HomeTabState extends State<_HomeTab> {
               _ActionBtn(icon: Icons.qr_code_scanner_rounded, label: 'Scan', onTap: () => context.push('/scan-qr')),
               _ActionBtn(icon: Icons.call_received_rounded, label: 'Receive', onTap: () => context.push('/receive-money')),
               _ActionBtn(icon: Icons.sync_rounded, label: 'Sync', onTap: _manualSync),
-              _ActionBtn(icon: Icons.wifi_tethering_rounded, label: 'Radio', onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Radio transfer coming soon!'), behavior: SnackBarBehavior.floating),
-                );
-              }),
+              _ActionBtn(icon: Icons.wifi_tethering_rounded, label: 'Radio', onTap: () => context.push('/radio')),
             ],
           ).animate().fadeIn(delay: 350.ms),
           const SizedBox(height: 32),

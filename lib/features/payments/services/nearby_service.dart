@@ -11,6 +11,7 @@ class NearbyTransferService {
   bool isDiscovering = false;
 
   Function(String userName)? onUserFound;
+  Function(String endpointId, String userName)? onEndpointFound;
   Function(String payload)? onTransferReceived;
   Function(String msg)? onError;
 
@@ -54,6 +55,7 @@ class NearbyTransferService {
         strategy,
         onEndpointFound: (String id, String userName, String serviceId) {
           onUserFound?.call(userName);
+          onEndpointFound?.call(id, userName); // Pass ID back to UI
           // Request connection instantly
           Nearby().requestConnection(
             wallet.name,
