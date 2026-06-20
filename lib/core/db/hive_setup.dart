@@ -43,6 +43,11 @@ class HiveSetup {
     return list;
   }
 
+  static OfflineTransaction? getTransaction(String txId) {
+    final box = Hive.box<OfflineTransaction>(transactionsBox);
+    return box.get(txId);
+  }
+
   static Future<void> saveTransaction(OfflineTransaction tx) async {
     final box = Hive.box<OfflineTransaction>(transactionsBox);
     await box.put(tx.txId, tx); // keyed by txId for idempotency
