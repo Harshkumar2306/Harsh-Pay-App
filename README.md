@@ -70,7 +70,7 @@ flutter build apk --release
 
 ## 📸 Screenshots
 
-*(Add your beautiful screenshots here)*
+*( )*
 
 ---
 
