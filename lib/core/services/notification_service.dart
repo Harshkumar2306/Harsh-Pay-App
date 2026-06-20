@@ -1,10 +1,9 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:uuid/uuid.dart';
 import '../../domain/entities/notification_entity.dart';
 import '../db/hive_setup.dart';
 import 'dart:math';
-import 'dart:ui';
-
 
 class NotificationService {
   static final FlutterLocalNotificationsPlugin _plugin = FlutterLocalNotificationsPlugin();
@@ -38,7 +37,7 @@ class NotificationService {
       importance: Importance.max,
       priority: Priority.high,
       icon: '@mipmap/launcher_icon',
-      color: Color(0xFF10B981), // AppColors.primary
+      color: Color(0xFF10B981),
     );
 
     const NotificationDetails details = NotificationDetails(
