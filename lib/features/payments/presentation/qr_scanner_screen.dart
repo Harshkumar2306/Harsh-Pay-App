@@ -125,8 +125,12 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
     await HiveSetup.saveWallet(wallet);
 
     // Mathematically record the Offline Transaction
+    // We encode the receiver's ID into the txId so the cloud knows who to credit!
+    final txId = const Uuid().v4();
+    final receiverId = payload['id'] ?? 'unknown';
+    
     final tx = OfflineTransaction(
-      txId: const Uuid().v4(),
+      txId: '$txId::$receiverId',
       type: 'debit',
       amount: amount,
       title: 'Sent offline to ${payload['name']}',

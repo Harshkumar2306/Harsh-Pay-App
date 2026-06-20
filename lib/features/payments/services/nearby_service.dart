@@ -119,6 +119,22 @@ class NearbyTransferService {
       final double amount = (data['amount'] as num).toDouble();
       final String senderName = data['senderName'];
 
+      final wallet = HiveSetup.getWallet();
+      if (wallet != null) {
+        wallet.syncedBalance += amount;
+        await HiveSetup.saveWallet(wallet);
+
+        final tx = OfflineTransaction(
+          txId: data['txId'] ?? const Uuid().v4(),
+          type: 'credit',
+          amount: amount,
+          title: 'Received offline from $senderName',
+          timestamp: DateTime.now().millisecondsSinceEpoch,
+          isSynced: false,
+        );
+        await HiveSetup.saveTransaction(tx);
+      }
+
       onTransferReceived?.call('Received ₹$amount over radio from $senderName');
     } catch (e) {
       onError?.call('Failed to parse incoming radio money');
