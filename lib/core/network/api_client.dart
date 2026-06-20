@@ -42,4 +42,31 @@ class ApiClient {
       return null;
     }
   }
+
+  /// Instantly pays online — like UPI. Debits sender, credits receiver in real-time.
+  /// Returns null on network failure (caller should fall back to offline mode).
+  Future<Map<String, dynamic>?> payOnline({
+    required String senderClerkId,
+    required String receiverClerkId,
+    required double amount,
+    String? note,
+  }) async {
+    try {
+      final response = await _dio.post('/pay/online', data: {
+        'senderClerkId': senderClerkId,
+        'receiverClerkId': receiverClerkId,
+        'amount': amount,
+        if (note != null) 'note': note,
+      });
+
+      if (response.statusCode == 200 && response.data['success'] == true) {
+        return response.data;
+      }
+      // Server returned an error (e.g. insufficient balance)
+      return {'error': response.data['error'] ?? 'Payment failed'};
+    } catch (e) {
+      // Network failure — return null so caller knows to go offline
+      return null;
+    }
+  }
 }

@@ -3,9 +3,11 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:go_router/go_router.dart';
 import 'package:uuid/uuid.dart';
 import 'dart:convert';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/db/hive_setup.dart';
 import '../../../core/db/models/offline_transaction.dart';
+import '../../../core/network/api_client.dart';
 
 class QRScannerScreen extends StatefulWidget {
   const QRScannerScreen({super.key});
@@ -116,56 +118,153 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
     }
 
     if (wallet.syncedBalance < amount) {
-      _showError('Insufficient Offline Balance!');
+      _showError('Insufficient balance!');
       return;
     }
 
-    // Mathematically deduct from our local wallet
+    // Check if we are online
+    final connectivityResult = await Connectivity().checkConnectivity();
+    final bool isOnline = connectivityResult != ConnectivityResult.none;
+
+    if (isOnline) {
+      // ───────────────────────────────────────────────
+      // ONLINE MODE — Instant UPI-style cloud payment
+      // ───────────────────────────────────────────────
+      _showLoadingDialog('Paying ₹$amount to ${payload['name']}...');
+
+      final result = await ApiClient().payOnline(
+        senderClerkId: wallet.clerkId,
+        receiverClerkId: payload['id'] ?? '',
+        amount: amount,
+        note: 'Sent to ${payload['name']}',
+      );
+
+      if (!mounted) return;
+      Navigator.pop(context); // close loading dialog
+
+      if (result == null) {
+        // Network dropped mid-request — fall back to offline
+        await _executeOfflineTransfer(wallet, payload, amount);
+        return;
+      }
+
+      if (result.containsKey('error')) {
+        _showError(result['error']);
+        return;
+      }
+
+      // Success! Update local balance from server's response
+      final double newBalance = (result['newBalance'] as num).toDouble();
+      wallet.syncedBalance = newBalance;
+      await HiveSetup.saveWallet(wallet);
+
+      // Record as a SYNCED transaction (no pending)
+      final tx = OfflineTransaction(
+        txId: 'ONLINE_${const Uuid().v4()}',
+        type: 'debit',
+        amount: amount,
+        title: 'Sent to ${payload['name']}',
+        timestamp: DateTime.now().millisecondsSinceEpoch,
+        isSynced: true, // Already synced!
+      );
+      await HiveSetup.saveTransaction(tx);
+
+      if (!mounted) return;
+      _showSuccessDialog(
+        '✅ Paid ₹$amount to ${result['receiverName'] ?? payload['name']}!',
+        isOnline: true,
+      );
+    } else {
+      // ───────────────────────────────────────────────
+      // OFFLINE MODE — Local debit, sync later
+      // ───────────────────────────────────────────────
+      await _executeOfflineTransfer(wallet, payload, amount);
+    }
+  }
+
+  Future<void> _executeOfflineTransfer(dynamic wallet, Map<String, dynamic> payload, double amount) async {
     wallet.syncedBalance -= amount;
     await HiveSetup.saveWallet(wallet);
 
-    // Mathematically record the Offline Transaction
-    // We encode the receiver's ID into the txId so the cloud knows who to credit!
     final txId = const Uuid().v4();
     final receiverId = payload['id'] ?? 'unknown';
-    
+
     final tx = OfflineTransaction(
       txId: '$txId::$receiverId',
       type: 'debit',
       amount: amount,
       title: 'Sent offline to ${payload['name']}',
       timestamp: DateTime.now().millisecondsSinceEpoch,
-      isSynced: false,
+      isSynced: false, // Will sync when online
     );
     await HiveSetup.saveTransaction(tx);
 
     if (!mounted) return;
-    
-    // Show massive success!
+    _showSuccessDialog(
+      '₹$amount sent to ${payload['name']} offline.\nWill sync when connected.',
+      isOnline: false,
+    );
+  }
+
+  void _showLoadingDialog(String message) {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        backgroundColor: AppColors.primary,
-        title: const Icon(Icons.check_circle, color: AppColors.background, size: 64),
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        content: Row(
+          children: [
+            const CircularProgressIndicator(color: AppColors.primary),
+            const SizedBox(width: 16),
+            Expanded(child: Text(message, style: const TextStyle(color: AppColors.textPrimary))),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showSuccessDialog(String message, {required bool isOnline}) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: isOnline ? AppColors.primary : AppColors.surface,
+        title: Icon(
+          isOnline ? Icons.check_circle : Icons.access_time_rounded,
+          color: isOnline ? AppColors.background : AppColors.primary,
+          size: 64,
+        ),
         content: Text(
-          'Successfully sent ₹$amount offline to ${payload['name']}!',
+          message,
           textAlign: TextAlign.center,
-          style: const TextStyle(color: AppColors.background, fontSize: 20, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            color: isOnline ? AppColors.background : AppColors.textPrimary,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         actions: [
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.background),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: isOnline ? AppColors.background : AppColors.primary,
+            ),
             onPressed: () {
-              Navigator.pop(context); // close dialog
-              context.go('/home'); // go home
+              Navigator.pop(ctx);
+              context.go('/home');
             },
-            child: const Text('Done', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
+            child: Text(
+              'Done',
+              style: TextStyle(
+                color: isOnline ? AppColors.primary : AppColors.background,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
         ],
       ),
     );
   }
+
 
   @override
   Widget build(BuildContext context) {
