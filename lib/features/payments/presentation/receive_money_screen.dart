@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'dart:convert';
+import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/db/hive_setup.dart';
 
@@ -127,6 +128,26 @@ class _ReceiveMoneyScreenState extends State<ReceiveMoneyScreen> {
                 'Enter an amount to lock the QR code to a specific value, or leave blank to let them choose.',
                 textAlign: TextAlign.center,
                 style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
+              ),
+              const SizedBox(height: 32),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: AppColors.primary),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  ),
+                  icon: const Icon(Icons.qr_code_scanner_rounded, color: AppColors.primary),
+                  label: const Text('Scan Sender\'s Confirmation', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 16)),
+                  onPressed: () => context.push('/scan-qr'),
+                ),
+              ),
+              const SizedBox(height: 12),
+              const Text(
+                'Once they send the money, scan their phone screen to claim it offline instantly.',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
               ),
             ],
           ),
