@@ -142,7 +142,7 @@ class _TransactionHistoryTabState extends State<TransactionHistoryTab> {
                             if (!tx.isSynced)
                               Padding(
                                 padding: const EdgeInsets.only(top: 4.0),
-                                child: Text('Pending Sync', style: TextStyle(color: Colors.orange.withOpacity(0.8), fontSize: 10, fontWeight: FontWeight.bold)),
+                                child: Text('Pending Sync', style: TextStyle(color: Colors.orange.withValues(alpha: 0.8), fontSize: 10, fontWeight: FontWeight.bold)),
                               ),
                           ],
                         ),

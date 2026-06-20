@@ -98,7 +98,7 @@ class _ProfileTabState extends State<ProfileTab> {
                 borderRadius: BorderRadius.circular(28),
                 border: Border.all(color: AppColors.border),
                 boxShadow: [
-                  BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 20, offset: const Offset(0, 8)),
+                  BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 20, offset: const Offset(0, 8)),
                 ],
               ),
               child: Column(
@@ -113,7 +113,7 @@ class _ProfileTabState extends State<ProfileTab> {
                       ),
                       shape: BoxShape.circle,
                       boxShadow: [
-                        BoxShadow(color: AppColors.primary.withOpacity(0.4), blurRadius: 20, offset: const Offset(0, 8)),
+                        BoxShadow(color: AppColors.primary.withValues(alpha: 0.4), blurRadius: 20, offset: const Offset(0, 8)),
                       ],
                     ),
                     child: Center(
@@ -248,10 +248,10 @@ class _ProfileTabState extends State<ProfileTab> {
                       ],
                     ),
                   );
-                  if (confirm == true && mounted) {
+                  if (confirm == true) {
                     final box = Hive.box<OfflineWallet>(HiveSetup.walletBox);
                     await box.clear();
-                    if (mounted) context.go('/sync');
+                    if (context.mounted) context.go('/sync');
                   }
                 },
               ),
@@ -287,7 +287,7 @@ class _StatCard extends StatelessWidget {
           Container(
             width: 38, height: 38,
             decoration: BoxDecoration(
-              color: c.withOpacity(0.12),
+              color: c.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(icon, color: c, size: 18),

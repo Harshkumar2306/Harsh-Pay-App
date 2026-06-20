@@ -95,7 +95,7 @@ class _AppSyncScreenState extends State<AppSyncScreen> {
               height: 300,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: AppColors.primary.withOpacity(0.12),
+                color: AppColors.primary.withValues(alpha: 0.12),
               ),
             ),
           ),
@@ -107,7 +107,7 @@ class _AppSyncScreenState extends State<AppSyncScreen> {
               height: 250,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: AppColors.primary.withOpacity(0.08),
+                color: AppColors.primary.withValues(alpha: 0.08),
               ),
             ),
           ),
@@ -140,7 +140,7 @@ class _AppSyncScreenState extends State<AppSyncScreen> {
                               borderRadius: BorderRadius.circular(28),
                               boxShadow: [
                                 BoxShadow(
-                                  color: AppColors.primary.withOpacity(0.4),
+                                  color: AppColors.primary.withValues(alpha: 0.4),
                                   blurRadius: 30,
                                   offset: const Offset(0, 10),
                                 ),
@@ -195,7 +195,7 @@ class _AppSyncScreenState extends State<AppSyncScreen> {
                           border: Border.all(color: AppColors.border),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.4),
+                              color: Colors.black.withValues(alpha: 0.4),
                               blurRadius: 40,
                               offset: const Offset(0, 20),
                             ),
@@ -243,7 +243,7 @@ class _AppSyncScreenState extends State<AppSyncScreen> {
                                 decoration: InputDecoration(
                                   hintText: 'user_xxxxxxxxxxxxxxxx',
                                   hintStyle: TextStyle(
-                                    color: AppColors.textSecondary.withOpacity(0.6),
+                                    color: AppColors.textSecondary.withValues(alpha: 0.6),
                                     fontFamily: 'monospace',
                                     fontSize: 14,
                                   ),

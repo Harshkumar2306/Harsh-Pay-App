@@ -41,7 +41,7 @@ class _HomeScreenState extends State<HomeScreen> {
               width: 300, height: 300,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: AppColors.primary.withOpacity(0.10),
+                color: AppColors.primary.withValues(alpha: 0.10),
               ),
             ).animate(onPlay: (c) => c.repeat(reverse: true))
              .scale(begin: const Offset(1, 1), end: const Offset(1.2, 1.2), duration: 5.seconds),
@@ -53,9 +53,9 @@ class _HomeScreenState extends State<HomeScreen> {
             bottom: 24, left: 20, right: 20,
             child: GlassContainer(
               blur: 20,
-              color: const Color(0xFF0F172A).withOpacity(0.85),
+              color: const Color(0xFF0F172A).withValues(alpha: 0.85),
               borderRadius: BorderRadius.circular(32),
-              border: Border.all(color: AppColors.border.withOpacity(0.6)),
+              border: Border.all(color: AppColors.border.withValues(alpha: 0.6)),
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -107,7 +107,7 @@ class _NavItem extends StatelessWidget {
         curve: Curves.easeOut,
         padding: EdgeInsets.symmetric(horizontal: isSelected ? 18 : 14, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary.withOpacity(0.18) : Colors.transparent,
+          color: isSelected ? AppColors.primary.withValues(alpha: 0.18) : Colors.transparent,
           borderRadius: BorderRadius.circular(24),
         ),
         child: Row(
@@ -271,13 +271,13 @@ class _HomeTabState extends State<_HomeTab> {
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                     decoration: BoxDecoration(
                       color: _isOnline
-                          ? AppColors.primary.withOpacity(0.15)
-                          : Colors.orange.withOpacity(0.15),
+                          ? AppColors.primary.withValues(alpha: 0.15)
+                          : Colors.orange.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
                         color: _isOnline
-                            ? AppColors.primary.withOpacity(0.4)
-                            : Colors.orange.withOpacity(0.4),
+                            ? AppColors.primary.withValues(alpha: 0.4)
+                            : Colors.orange.withValues(alpha: 0.4),
                       ),
                     ),
                     child: Row(
@@ -336,7 +336,7 @@ class _HomeTabState extends State<_HomeTab> {
               borderRadius: BorderRadius.circular(28),
               boxShadow: [
                 BoxShadow(
-                  color: AppColors.primary.withOpacity(0.35),
+                  color: AppColors.primary.withValues(alpha: 0.35),
                   blurRadius: 30,
                   offset: const Offset(0, 15),
                 ),
@@ -352,9 +352,9 @@ class _HomeTabState extends State<_HomeTab> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.15),
+                        color: Colors.white.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.white.withOpacity(0.2)),
+                        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
                       ),
                       child: Row(
                         children: [
@@ -390,7 +390,7 @@ class _HomeTabState extends State<_HomeTab> {
                 const SizedBox(height: 6),
                 Text(
                   'Tap sync to refresh from cloud',
-                  style: TextStyle(color: Colors.white.withOpacity(0.55), fontSize: 12),
+                  style: TextStyle(color: Colors.white.withValues(alpha: 0.55), fontSize: 12),
                 ),
                 const SizedBox(height: 20),
                 Row(
@@ -399,9 +399,9 @@ class _HomeTabState extends State<_HomeTab> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.10),
+                        color: Colors.white.withValues(alpha: 0.10),
                         borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: Colors.white.withOpacity(0.15)),
+                        border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -431,9 +431,9 @@ class _HomeTabState extends State<_HomeTab> {
                           children: [
                             Container(
                               decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.15),
+                                color: Colors.white.withValues(alpha: 0.15),
                                 shape: BoxShape.circle,
-                                border: Border.all(color: Colors.white.withOpacity(0.2)),
+                                border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
                               ),
                               child: IconButton(
                                 icon: const Icon(Icons.notifications_none_rounded, color: Colors.white),
@@ -585,7 +585,7 @@ class _TxTile extends StatelessWidget {
           Container(
             width: 44, height: 44,
             decoration: BoxDecoration(
-              color: isCredit ? AppColors.primary.withOpacity(0.15) : Colors.red.withOpacity(0.10),
+              color: isCredit ? AppColors.primary.withValues(alpha: 0.15) : Colors.red.withValues(alpha: 0.10),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(
@@ -729,9 +729,9 @@ class _MethodCard extends StatelessWidget {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                             decoration: BoxDecoration(
-                              color: Colors.orange.withOpacity(0.15),
+                              color: Colors.orange.withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(6),
-                              border: Border.all(color: Colors.orange.withOpacity(0.3)),
+                              border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
                             ),
                             child: const Text('Soon', style: TextStyle(color: Colors.orange, fontSize: 10, fontWeight: FontWeight.bold)),
                           ),
