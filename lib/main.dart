@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'core/theme/app_theme.dart';
 import 'core/utils/app_router.dart';
 import 'core/db/hive_setup.dart';
+import 'core/services/notification_service.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -9,6 +11,9 @@ void main() async {
   // Initialize Hive for offline-first architecture
   await HiveSetup.init();
   
+  // Initialize Push Notifications
+  await NotificationService.init();
+
   runApp(const HarshPayApp());
 }
 

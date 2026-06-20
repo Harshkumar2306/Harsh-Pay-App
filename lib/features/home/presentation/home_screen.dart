@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_colors.dart';
@@ -9,6 +10,8 @@ import '../../../core/network/api_client.dart';
 import '../../../core/db/hive_setup.dart';
 import '../../../core/db/models/offline_wallet.dart';
 import '../../../core/db/models/offline_transaction.dart';
+import '../../../../domain/entities/notification_entity.dart';
+import '../../../../core/services/notification_service.dart';
 import '../../transactions/presentation/transaction_history_tab.dart';
 import '../../profile/presentation/profile_tab.dart';
 import '../../../presentation/widgets/animated_bouncy_button.dart';
@@ -175,6 +178,7 @@ class _HomeTabState extends State<_HomeTab> {
       }
 
       if (!mounted) return;
+      
       setState(() {
         wallet = updated;
         transactions = HiveSetup.getTransactions();
@@ -203,6 +207,14 @@ class _HomeTabState extends State<_HomeTab> {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
       );
+      
+      // Trigger a local push notification if online
+      if (_isOnline) {
+        NotificationService.showNotification(
+          title: 'Sync Successful',
+          message: 'Your wallet has been synced securely from the cloud.',
+        );
+      }
     }
   }
 
@@ -381,29 +393,78 @@ class _HomeTabState extends State<_HomeTab> {
                   style: TextStyle(color: Colors.white.withOpacity(0.55), fontSize: 12),
                 ),
                 const SizedBox(height: 20),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.10),
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: Colors.white.withOpacity(0.15)),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: const [
-                          Icon(Icons.shield_rounded, color: Colors.white70, size: 14),
-                          SizedBox(width: 6),
-                          Text('Hive Encrypted Local DB', style: TextStyle(color: Colors.white70, fontSize: 12)),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.10),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: Colors.white.withOpacity(0.15)),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: const [
+                              Icon(Icons.shield_rounded, color: Colors.white70, size: 14),
+                              SizedBox(width: 6),
+                              Text('Hive Encrypted Local DB', style: TextStyle(color: Colors.white70, fontSize: 12)),
+                            ],
+                          ),
+                          const SizedBox(width: 12),
+                          Text(
+                            wallet != null ? 'Active' : '—',
+                            style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+                          ),
                         ],
                       ),
-                      Text(
-                        wallet != null ? 'Active' : '—',
-                        style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  ),
+                    ),
+                    // ── Notifications Bell ──
+                    ValueListenableBuilder(
+                      valueListenable: Hive.box<NotificationEntity>(HiveSetup.notificationsBox).listenable(),
+                      builder: (context, Box<NotificationEntity> box, _) {
+                        final unreadCount = box.values.where((n) => !n.isRead).length;
+                        return Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.15),
+                                shape: BoxShape.circle,
+                                border: Border.all(color: Colors.white.withOpacity(0.2)),
+                              ),
+                              child: IconButton(
+                                icon: const Icon(Icons.notifications_none_rounded, color: Colors.white),
+                                onPressed: () => context.push('/notifications'),
+                              ),
+                            ),
+                            if (unreadCount > 0)
+                              Positioned(
+                                right: -2,
+                                top: -2,
+                                child: Container(
+                                  padding: const EdgeInsets.all(4),
+                                  decoration: const BoxDecoration(
+                                    color: AppColors.error,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Text(
+                                    unreadCount > 9 ? '9+' : unreadCount.toString(),
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ).animate().scale(duration: 300.ms, curve: Curves.easeOutBack),
+                          ],
+                        );
+                      },
+                    ),
+                  ],
                 ),
               ],
             ),

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../features/sync/screens/app_sync_screen.dart';
+import '../../features/notifications/presentation/notifications_screen.dart';
+
 import '../../features/home/presentation/home_screen.dart';
 import '../../features/payments/presentation/qr_scanner_screen.dart';
 import '../../features/payments/presentation/receive_money_screen.dart';
@@ -31,6 +33,10 @@ class AppRouter {
       GoRoute(
         path: '/sync',
         builder: (context, state) => const AppSyncScreen(),
+      ),
+      GoRoute(
+        path: '/notifications',
+        builder: (context, state) => const NotificationsScreen(),
       ),
       GoRoute(
         path: '/home',
