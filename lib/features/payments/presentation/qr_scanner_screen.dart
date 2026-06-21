@@ -180,7 +180,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
 
     // Check if we are online
     final connectivityResult = await Connectivity().checkConnectivity();
-    final bool isOnline = connectivityResult != ConnectivityResult.none;
+    final bool isOnline = !connectivityResult.contains(ConnectivityResult.none);
 
     if (isOnline) {
       // ───────────────────────────────────────────────

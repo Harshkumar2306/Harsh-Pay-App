@@ -17,6 +17,8 @@ import '../../profile/presentation/profile_tab.dart';
 import '../../../presentation/widgets/animated_bouncy_button.dart';
 import '../../../presentation/widgets/glass_container.dart';
 import './widgets/offline_hub_sheet.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'dart:async';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -142,12 +144,27 @@ class _HomeTabState extends State<_HomeTab> {
   List<OfflineTransaction> transactions = [];
   bool _isSyncing = false;
   bool _isOnline = false;
+  StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
 
   @override
   void initState() {
     super.initState();
     _loadLocal();
     _autoSync();
+
+    _connectivitySubscription = Connectivity().onConnectivityChanged.listen((List<ConnectivityResult> results) {
+      final isConnected = !results.contains(ConnectivityResult.none);
+      if (mounted && _isOnline != isConnected) {
+        setState(() => _isOnline = isConnected);
+        if (isConnected) _autoSync(); // Sync automatically when reconnecting!
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _connectivitySubscription?.cancel();
+    super.dispose();
   }
 
   void _loadLocal() {
@@ -531,19 +548,29 @@ class _HomeTabState extends State<_HomeTab> {
                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Online Bank Transfer Coming Soon')));
                 }
               ),
-              _ActionBtn(
-                icon: Icons.wifi_off_rounded, 
-                label: 'Offline Vault', 
-                iconColor: Colors.orange,
-                onTap: () {
-                  showModalBottomSheet(
-                    context: context,
-                    isScrollControlled: true,
-                    backgroundColor: Colors.transparent,
-                    builder: (context) => OfflineHubSheet(onSyncPressed: _manualSync),
-                  );
-                }
-              ),
+              if (!_isOnline) // UNLOCK OFFLINE VAULT WHEN OFFLINE!
+                _ActionBtn(
+                  icon: Icons.wifi_off_rounded, 
+                  label: 'Offline Vault', 
+                  iconColor: Colors.orange,
+                  onTap: () {
+                    showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      backgroundColor: Colors.transparent,
+                      builder: (context) => OfflineHubSheet(onSyncPressed: _manualSync),
+                    );
+                  }
+                )
+              else
+                _ActionBtn(
+                  icon: Icons.lock_outline_rounded, 
+                  label: 'Offline Vault', 
+                  iconColor: AppColors.textSecondary.withValues(alpha: 0.5),
+                  onTap: () {
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Turn off internet to unlock offline tools')));
+                  }
+                ),
             ],
           ).animate().fadeIn(delay: 350.ms),
           const SizedBox(height: 32),
