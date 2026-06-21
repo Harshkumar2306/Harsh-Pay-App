@@ -6,6 +6,8 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/db/hive_setup.dart';
 import '../../../core/db/models/offline_wallet.dart';
+import '../../../core/db/models/offline_transaction.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 class AppSyncScreen extends StatefulWidget {
   const AppSyncScreen({super.key});
