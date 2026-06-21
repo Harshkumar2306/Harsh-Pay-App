@@ -65,6 +65,12 @@ class _AppSyncScreenState extends State<AppSyncScreen> {
         syncedBalance: (data['syncedBalance'] as num?)?.toDouble() ?? 0.0,
       );
 
+      // Wipe any leftover ghost data from previous accounts before syncing the new one
+      final box = Hive.box<OfflineWallet>(HiveSetup.walletBox);
+      await box.clear();
+      final txBox = Hive.box<OfflineTransaction>(HiveSetup.transactionsBox);
+      await txBox.clear();
+
       await HiveSetup.saveWallet(wallet);
       HapticFeedback.heavyImpact();
 
