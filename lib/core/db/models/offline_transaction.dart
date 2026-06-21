@@ -6,7 +6,7 @@ class OfflineTransaction {
   final double amount;
   final String title;
   final int timestamp;
-  final bool isSynced;
+  bool isSynced;
 
   OfflineTransaction({
     required this.txId,

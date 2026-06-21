@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import '../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_colors.dart';
 
 class OfflineHubSheet extends StatelessWidget {
   final VoidCallback onSyncPressed;
@@ -43,11 +43,11 @@ class OfflineHubSheet extends StatelessWidget {
                 child: const Icon(Icons.wifi_off_rounded, color: Colors.orange, size: 24),
               ),
               const SizedBox(width: 16),
-              const Expanded(
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Offline Vault', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w900)),
+                    const Text('Offline Vault', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w900)),
                     Text('Use these tools when you have no internet', style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
                   ],
                 ),
