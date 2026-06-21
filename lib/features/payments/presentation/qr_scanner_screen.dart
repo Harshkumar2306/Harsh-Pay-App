@@ -75,6 +75,13 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
     final String txId = payload['txId'];
     final double amount = (payload['amount'] as num).toDouble();
     final String senderName = payload['senderName'];
+    final String intendedReceiverId = payload['receiverId'] ?? '';
+
+    // CRITICAL SECURITY CHECK: Ensure this payment was meant for ME!
+    if (intendedReceiverId != wallet.clerkId) {
+      _showError('Security Error: This payment was not meant for you!');
+      return;
+    }
 
     // Check if we already processed this txId
     final existingTx = HiveSetup.getTransaction(txId);
@@ -252,6 +259,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
       'txId': tx.txId,
       'amount': amount,
       'senderName': wallet.name,
+      'receiverId': receiverId, // CRITICAL: So only the true receiver can claim this!
     };
     final qrData = 'harshpay://success?data=${jsonEncode(successPayload)}';
 
