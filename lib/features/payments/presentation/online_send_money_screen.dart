@@ -147,10 +147,10 @@ class _OnlineSendMoneyScreenState extends State<OnlineSendMoneyScreen> {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: AppColors.success.withValues(alpha: 0.1),
+                color: AppColors.primary.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.check_circle_rounded, color: AppColors.success, size: 80),
+              child: const Icon(Icons.check_circle_rounded, color: AppColors.primary, size: 80),
             ).animate().scale(delay: 200.ms, duration: 500.ms, curve: Curves.easeOutBack),
             const SizedBox(height: 32),
             const Text(
