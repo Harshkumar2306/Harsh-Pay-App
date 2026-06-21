@@ -251,7 +251,7 @@ class _ProfileTabState extends State<ProfileTab> {
                   if (confirm == true) {
                     final box = Hive.box<OfflineWallet>(HiveSetup.walletBox);
                     await box.clear();
-                    final txBox = Hive.box<OfflineTransaction>(HiveSetup.transactionBox);
+                    final txBox = Hive.box<OfflineTransaction>(HiveSetup.transactionsBox);
                     await txBox.clear();
                     if (context.mounted) context.go('/sync');
                   }
