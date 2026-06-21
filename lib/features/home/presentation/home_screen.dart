@@ -158,6 +158,29 @@ class _HomeTabState extends State<_HomeTab> {
 
   Future<void> _autoSync() async {
     if (wallet == null) return;
+
+    // 1. Upload pending offline transactions FIRST
+    final unsyncedTxs = transactions.where((tx) => !tx.isSynced).toList();
+    if (unsyncedTxs.isNotEmpty) {
+      final txMapList = unsyncedTxs.map((tx) => {
+        'id': tx.txId,
+        'amount': tx.amount,
+        'type': tx.type,
+        'title': tx.title,
+        'timestamp': tx.timestamp,
+      }).toList();
+
+      final syncResult = await ApiClient().syncTransactions(wallet!.clerkId, txMapList);
+      if (syncResult != null && syncResult['results'] != null) {
+        // Mark them as synced locally
+        for (var tx in unsyncedTxs) {
+          tx.isSynced = true;
+          await HiveSetup.saveTransaction(tx);
+        }
+      }
+    }
+
+    // 2. Fetch the latest truthful wallet data from the cloud
     final data = await ApiClient().fetchWalletData(wallet!.appSyncId);
     if (!mounted) return;
     if (data != null) {
