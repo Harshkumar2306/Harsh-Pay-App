@@ -16,6 +16,7 @@ import '../../transactions/presentation/transaction_history_tab.dart';
 import '../../profile/presentation/profile_tab.dart';
 import '../../../presentation/widgets/animated_bouncy_button.dart';
 import '../../../presentation/widgets/glass_container.dart';
+import './widgets/offline_hub_sheet.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -504,16 +505,45 @@ class _HomeTabState extends State<_HomeTab> {
           const SizedBox(height: 28),
 
           // ── Quick Actions ──
-          const Text('Quick Actions', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w800))
+          const Text('Online Banking', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w800))
               .animate().fadeIn(delay: 300.ms),
           const SizedBox(height: 16),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _ActionBtn(icon: Icons.qr_code_scanner_rounded, label: 'Scan', onTap: () => context.push('/scan-qr')),
-              _ActionBtn(icon: Icons.call_received_rounded, label: 'Receive', onTap: () => context.push('/receive-money')),
-              _ActionBtn(icon: Icons.sync_rounded, label: 'Sync', onTap: _manualSync),
-              _ActionBtn(icon: Icons.wifi_tethering_rounded, label: 'Radio', onTap: () => context.push('/radio')),
+              _ActionBtn(
+                icon: Icons.qr_code_scanner_rounded, 
+                label: 'Scan & Pay', 
+                onTap: () => context.push('/scan-qr')
+              ),
+              _ActionBtn(
+                icon: Icons.send_rounded, 
+                label: 'Send Money', 
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Online Send Money Coming Soon')));
+                }
+              ),
+              _ActionBtn(
+                icon: Icons.account_balance_rounded, 
+                label: 'Bank Transfer', 
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Online Bank Transfer Coming Soon')));
+                }
+              ),
+              _ActionBtn(
+                icon: Icons.wifi_off_rounded, 
+                label: 'Offline Vault', 
+                iconColor: Colors.orange,
+                onTap: () {
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    backgroundColor: Colors.transparent,
+                    builder: (context) => OfflineHubSheet(onSyncPressed: _manualSync),
+                  );
+                }
+              ),
             ],
           ).animate().fadeIn(delay: 350.ms),
           const SizedBox(height: 32),
@@ -565,8 +595,14 @@ class _ActionBtn extends StatelessWidget {
   final IconData icon;
   final String label;
   final VoidCallback onTap;
+  final Color iconColor;
 
-  const _ActionBtn({required this.icon, required this.label, required this.onTap});
+  const _ActionBtn({
+    required this.icon, 
+    required this.label, 
+    required this.onTap,
+    this.iconColor = AppColors.primary,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -581,7 +617,7 @@ class _ActionBtn extends StatelessWidget {
               shape: BoxShape.circle,
               border: Border.all(color: AppColors.border),
             ),
-            child: Icon(icon, color: AppColors.primary, size: 26),
+            child: Icon(icon, color: iconColor, size: 26),
           ),
           const SizedBox(height: 8),
           Text(label, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12, color: AppColors.textPrimary)),
