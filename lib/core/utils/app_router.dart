@@ -5,6 +5,7 @@ import '../../features/notifications/presentation/notifications_screen.dart';
 import '../../features/home/presentation/home_screen.dart';
 import '../../features/payments/presentation/qr_scanner_screen.dart';
 import '../../features/payments/presentation/receive_money_screen.dart';
+import '../../features/payments/presentation/online_send_money_screen.dart';
 import '../../features/payments/presentation/radio_transfer_screen.dart';
 
 class AppRouter {
@@ -49,6 +50,10 @@ class AppRouter {
       GoRoute(
         path: '/receive-money',
         builder: (context, state) => const ReceiveMoneyScreen(),
+      ),
+      GoRoute(
+        path: '/send-money-online',
+        builder: (context, state) => const OnlineSendMoneyScreen(),
       ),
       GoRoute(
         path: '/radio',

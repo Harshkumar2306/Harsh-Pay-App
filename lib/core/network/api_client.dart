@@ -47,14 +47,16 @@ class ApiClient {
   /// Returns null on network failure (caller should fall back to offline mode).
   Future<Map<String, dynamic>?> payOnline({
     required String senderClerkId,
-    required String receiverClerkId,
+    String? receiverClerkId,
+    String? receiverEmail,
     required double amount,
     String? note,
   }) async {
     try {
       final response = await _dio.post('/pay/online', data: {
         'senderClerkId': senderClerkId,
-        'receiverClerkId': receiverClerkId,
+        if (receiverClerkId != null) 'receiverClerkId': receiverClerkId,
+        if (receiverEmail != null) 'receiverEmail': receiverEmail,
         'amount': amount,
         if (note != null) 'note': note,
       });

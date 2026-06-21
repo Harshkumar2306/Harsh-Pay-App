@@ -537,9 +537,7 @@ class _HomeTabState extends State<_HomeTab> {
               _ActionBtn(
                 icon: Icons.send_rounded, 
                 label: 'Send Money', 
-                onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Online Send Money Coming Soon')));
-                }
+                onTap: () => context.push('/send-money-online')
               ),
               _ActionBtn(
                 icon: Icons.account_balance_rounded, 
@@ -733,6 +731,14 @@ class _PaymentsHub extends StatelessWidget {
             const Text('Choose a transfer method', style: TextStyle(color: AppColors.textSecondary, fontSize: 14))
                 .animate().fadeIn(delay: 100.ms),
             const SizedBox(height: 32),
+            _MethodCard(
+              icon: Icons.send_rounded,
+              title: 'Send Money Online',
+              subtitle: 'Send money instantly using an email address',
+              gradient: [const Color(0xFFF59E0B), const Color(0xFFD97706)],
+              onTap: () => context.push('/send-money-online'),
+            ).animate().fadeIn(delay: 120.ms).slideY(begin: 0.1),
+            const SizedBox(height: 14),
             _MethodCard(
               icon: Icons.qr_code_rounded,
               title: 'Scan QR Code',
