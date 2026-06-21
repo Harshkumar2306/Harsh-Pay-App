@@ -172,10 +172,19 @@ class _HomeTabState extends State<_HomeTab> {
 
       final syncResult = await ApiClient().syncTransactions(wallet!.clerkId, txMapList);
       if (syncResult != null && syncResult['results'] != null) {
-        // Mark them as synced locally
+        final results = syncResult['results'] as List;
+        
         for (var tx in unsyncedTxs) {
-          tx.isSynced = true;
-          await HiveSetup.saveTransaction(tx);
+          // Find the result for this specific transaction
+          final res = results.firstWhere(
+            (r) => r['transactionId'] == tx.txId, 
+            orElse: () => null
+          );
+
+          if (res != null && (res['status'] == 'SUCCESS' || res['status'] == 'ALREADY_PROCESSED')) {
+            tx.isSynced = true;
+            await HiveSetup.saveTransaction(tx);
+          }
         }
       }
     }
