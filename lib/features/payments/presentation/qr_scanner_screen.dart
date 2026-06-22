@@ -61,8 +61,15 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
   }
 
   void _showError(String msg) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg, style: const TextStyle(color: Colors.white)), backgroundColor: AppColors.error));
-    setState(() => _isScanning = true);
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(msg, style: const TextStyle(color: Colors.white)),
+      backgroundColor: AppColors.error,
+      duration: const Duration(seconds: 2),
+    ));
+    // Wait for the snackbar to finish before scanning again to prevent infinite scan loops!
+    Future.delayed(const Duration(seconds: 2), () {
+      if (mounted) setState(() => _isScanning = true);
+    });
   }
 
   void _processSuccessPayload(Map<String, dynamic> payload) async {
@@ -167,19 +174,20 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
   }
 
   Future<void> _executeTransfer(Map<String, dynamic> payload, double amount) async {
-    final wallet = HiveSetup.getWallet();
-    if (wallet == null) {
-      _showError('Your wallet is not synced!');
-      return;
-    }
+    try {
+      final wallet = HiveSetup.getWallet();
+      if (wallet == null) {
+        _showError('Your wallet is not synced!');
+        return;
+      }
 
-    if (wallet.syncedBalance < amount) {
-      _showError('Insufficient balance!');
-      return;
-    }
+      if (wallet.syncedBalance < amount) {
+        _showError('Insufficient balance!');
+        return;
+      }
 
-    // Check if we are online
-    final connectivityResult = await Connectivity().checkConnectivity();
+      // Check if we are online
+      final connectivityResult = await Connectivity().checkConnectivity();
     final bool isOnline = !connectivityResult.contains(ConnectivityResult.none);
 
     if (isOnline) {
@@ -236,10 +244,14 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
       // ───────────────────────────────────────────────
       await _executeOfflineTransfer(wallet, payload, amount);
     }
+    } catch (e) {
+      _showError('Transfer failed: ${e.toString()}');
+    }
   }
 
   Future<void> _executeOfflineTransfer(dynamic wallet, Map<String, dynamic> payload, double amount) async {
-    wallet.syncedBalance -= amount;
+    try {
+      wallet.syncedBalance -= amount;
     await HiveSetup.saveWallet(wallet);
 
     final txId = const Uuid().v4();
@@ -302,6 +314,9 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
         ],
       ),
     );
+    } catch (e) {
+      _showError('Offline Transfer failed: ${e.toString()}');
+    }
   }
 
   void _showLoadingDialog(String message) {
