@@ -13,7 +13,11 @@ class NotificationService {
     if (_initialized) return;
 
     const AndroidInitializationSettings androidSettings = AndroidInitializationSettings('@mipmap/launcher_icon');
-    const DarwinInitializationSettings iosSettings = DarwinInitializationSettings();
+    const DarwinInitializationSettings iosSettings = DarwinInitializationSettings(
+      requestAlertPermission: true,
+      requestBadgePermission: true,
+      requestSoundPermission: true,
+    );
     
     const InitializationSettings initSettings = InitializationSettings(
       android: androidSettings,
@@ -21,6 +25,21 @@ class NotificationService {
     );
 
     await _plugin.initialize(initSettings);
+
+    // Request Android 13+ Notification Permission
+    await _plugin
+        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+        ?.requestNotificationsPermission();
+
+    // Request iOS Notification Permission (already triggered by iOS settings above, but explicit is safer)
+    await _plugin
+        .resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>()
+        ?.requestPermissions(
+          alert: true,
+          badge: true,
+          sound: true,
+        );
+
     _initialized = true;
   }
 
