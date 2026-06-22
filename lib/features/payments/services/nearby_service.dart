@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
 import 'package:nearby_connections/nearby_connections.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -16,8 +17,14 @@ class NearbyTransferService {
   Function(String payload)? onTransferReceived;
   Function(String msg)? onError;
 
-  Future<void> _checkPermissions() async {
-    await [
+  Future<bool> _checkPermissions() async {
+    // Android requires GPS to be turned on for Nearby Connections
+    if (Platform.isAndroid && await Permission.location.serviceStatus.isDisabled) {
+      onError?.call('GPS/Location services are disabled. Please turn them on in Settings.');
+      return false;
+    }
+
+    final statuses = await [
       Permission.location,
       Permission.bluetooth,
       Permission.bluetoothAdvertise,
@@ -25,11 +32,22 @@ class NearbyTransferService {
       Permission.bluetoothScan,
       Permission.nearbyWifiDevices,
     ].request();
+
+    // Check if core permissions are granted
+    if (statuses[Permission.location] == PermissionStatus.denied ||
+        statuses[Permission.bluetooth] == PermissionStatus.denied) {
+      onError?.call('Location and Bluetooth permissions are required for Radio Transfer.');
+      return false;
+    }
+
+    return true;
   }
 
   Future<void> startAdvertising() async {
     try {
-      await _checkPermissions();
+      bool hasPerms = await _checkPermissions();
+      if (!hasPerms) return;
+      
       final wallet = HiveSetup.getWallet();
       if (wallet == null) return;
 
@@ -64,7 +82,9 @@ class NearbyTransferService {
 
   Future<void> startDiscovering() async {
     try {
-      await _checkPermissions();
+      bool hasPerms = await _checkPermissions();
+      if (!hasPerms) return;
+      
       final wallet = HiveSetup.getWallet();
       if (wallet == null) return;
 
