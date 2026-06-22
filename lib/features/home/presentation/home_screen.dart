@@ -146,6 +146,7 @@ class _HomeTabState extends State<_HomeTab> {
   bool _isSyncing = false;
   bool _isOnline = false;
   StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
+  Timer? _pollingTimer;
 
   @override
   void initState() {
@@ -166,6 +167,13 @@ class _HomeTabState extends State<_HomeTab> {
         if (isConnected) _autoSync(); // Sync automatically when reconnecting!
       }
     });
+
+    // Start live polling for real-time escrow settlement updates
+    _pollingTimer = Timer.periodic(const Duration(seconds: 3), (_) {
+      if (_isOnline && !_isSyncing) {
+        _autoSync();
+      }
+    });
   }
 
   @override
@@ -176,6 +184,7 @@ class _HomeTabState extends State<_HomeTab> {
     tBox.listenable().removeListener(_loadLocal);
     
     _connectivitySubscription?.cancel();
+    _pollingTimer?.cancel();
     super.dispose();
   }
 
@@ -187,9 +196,11 @@ class _HomeTabState extends State<_HomeTab> {
   }
 
   Future<void> _autoSync() async {
-    if (wallet == null) return;
-
-    // 1. Upload pending offline transactions FIRST
+    if (wallet == null || _isSyncing) return;
+    
+    _isSyncing = true;
+    try {
+      // 1. Upload pending offline transactions FIRST
     final unsyncedTxs = transactions.where((tx) => !tx.isSynced).toList();
     if (unsyncedTxs.isNotEmpty) {
       final txMapList = unsyncedTxs.map((tx) => {
@@ -254,6 +265,9 @@ class _HomeTabState extends State<_HomeTab> {
     } else {
       if (!mounted) return;
       setState(() => _isOnline = false);
+    }
+    } finally {
+      _isSyncing = false;
     }
   }
 
