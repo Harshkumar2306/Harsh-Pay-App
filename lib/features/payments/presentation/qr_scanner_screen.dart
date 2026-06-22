@@ -216,10 +216,10 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
 
       // Record as a SYNCED transaction (no pending)
       final tx = OfflineTransaction(
-        txId: 'ONLINE_${const Uuid().v4()}',
+        txId: result['transactionId'] ?? 'ONLINE_${const Uuid().v4()}',
         type: 'debit',
         amount: amount,
-        title: 'Sent to ${payload['name']}',
+        title: result['title'] ?? 'Sent to ${payload['name']}',
         timestamp: DateTime.now().millisecondsSinceEpoch,
         isSynced: true, // Already synced!
       );
