@@ -1,46 +1,64 @@
 <div align="center">
   <img src="assets/images/logo.png" alt="Harsh Pay Logo" width="120"/>
   <h1>💳 Harsh Pay</h1>
-  <p><strong>The Next-Generation Offline-First Payment Application</strong></p>
+  <p><strong>The Next-Generation Offline-First Zero-Trust Payment Network</strong></p>
 </div>
 
 <br/>
 
 ## 🌟 Overview
 
-**Harsh Pay** is a state-of-the-art Flutter mobile application designed to seamlessly handle money transfers even completely **offline**. Using peer-to-peer Bluetooth technologies, local encrypted databases, and an intelligent background sync engine, Harsh Pay guarantees that you can pay your friends anywhere—whether you're deep underground in a subway or out in the wilderness without cellular coverage.
+**Harsh Pay** is a state-of-the-art Flutter mobile application and Next.js cloud ecosystem designed to seamlessly handle money transfers even completely **offline**. Bridging the gap between digital convenience and physical cash reliability, Harsh Pay guarantees that you can pay your friends anywhere—whether you're deep underground in a subway or out in the wilderness without cellular coverage.
 
 ---
 
-## 🚀 Key Features
+## 🚀 The Ecosystem
 
-* **📴 True Offline Payments**: Uses Google's `nearby_connections` to transfer funds securely over Bluetooth/Wi-Fi Direct without any internet connection.
-* **🔒 Encrypted Local Vault**: Powered by `Hive`, all user wallets, balances, and transaction histories are stored locally using military-grade encryption.
-* **☁️ Cloud Auto-Sync**: The moment your device connects to the internet, Harsh Pay seamlessly syncs all pending offline transactions to the cloud.
-* **📷 ML-Powered QR Scanner**: Instantly scan to pay using lightning-fast on-device Machine Learning (Google ML Kit).
-* **🔔 Smart Notifications**: Native Android push notifications and an in-app beautiful Notification Center timeline.
-* **🎨 Premium Aesthetics**: Built with a sleek, dark-mode-first glassmorphism design language using fluid micro-animations.
+Harsh Pay is split into a mobile client and a web-based backend settlement engine.
 
----
+### 🌐 The Cloud Backend & Web Dashboard (`harsh_bank_web`)
+- **Next.js (React / TypeScript)**: Used as the core web framework. It allows us to build both the user-facing web dashboard and the `/api/` backend routes in a single Vercel-hosted repository.
+- **MongoDB Atlas**: The cloud database. We used **Mongoose** to strictly define schemas for `Users`, `Wallets`, and `Transactions`.
+- **Clerk**: A drop-in authentication provider handling user sign-ups, secure passwords, and session tokens via Webhooks.
 
-## 🛠️ Technology Stack
-
-* **Framework:** Flutter (Dart)
-* **Architecture:** Riverpod + Repository Pattern
-* **Local Database:** Hive (Offline-First)
-* **Networking:** Dio & Connectivity Plus
-* **P2P Transfers:** Nearby Connections API
-* **Camera/ML:** Mobile Scanner & QR Flutter
-* **Routing:** GoRouter
+### 📱 The Mobile Client (`harsh_pay`)
+- **Flutter & Dart**: Chosen to compile native code to both iOS and Android from a single codebase, critical for a dual-platform offline payment network.
+- **Hive**: A lightning-fast, NoSQL local database acting as the offline ledger.
+- **Hardware Integrations**: `mobile_scanner` for optical QR data transmission, and `nearby_connections` for high-bandwidth Bluetooth/Wi-Fi Direct radio transmission.
 
 ---
 
-## ⚙️ Getting Started
+## 🔐 The "Zero-Trust" Two-Way Escrow Architecture
+
+The crown jewel of Harsh Pay is how it handles offline money without allowing double-spending fraud.
+
+When an offline payment is made (QR or Radio), the app generates a cryptographic `clientTxId` that acts as a secure envelope:
+`txId = {UUID}::{ReceiverClerkId}::{SenderClerkId}`
+
+Both phones log this locally as a `PENDING` transaction. **Balances do not drop instantly.**
+
+**The Settlement Flow:**
+1. Whichever user goes online first silently uploads their half of the transaction. The Vercel backend places it in an **Escrow Vault**. No cloud balances are touched.
+2. When the other user goes online, the backend retrieves the pending escrow transaction.
+3. The backend strictly verifies that the Sender ID, Receiver ID, and Amount **perfectly match** on both sides, and that the transaction is less than 24 hours old.
+4. If all checks pass, the backend atomically deducts the sender, credits the receiver, and marks both transactions as `SUCCESS`.
+
+---
+
+## 📡 Intelligent Network Engine
+
+- **Live Background Polling**: The app listens for hardware network changes. When the phone switches from Airplane Mode to Wi-Fi, the app waits exactly 2 seconds for DNS/Routing to settle.
+- A background timer fires every 3 seconds to silently upload any offline transactions.
+- **Push Notifications**: Powered by `flutter_local_notifications`, the moment the background engine successfully settles an escrow transaction with the cloud, a notification banner pops up instantly.
+
+---
+
+## 🛠️ Getting Started
 
 ### Prerequisites
 * Flutter SDK (`^3.12.2`)
-* Android Studio / VS Code
-* An Android Device (Bluetooth features require a physical device, not an emulator).
+* Android Studio / Xcode
+* A physical device (Bluetooth and Wi-Fi Direct features require a physical device, not an emulator).
 
 ### Installation
 
@@ -60,20 +78,12 @@
    flutter run
    ```
 
-### Building for Release
-Due to the integration of Google ML Kit and R8 Minification, use the provided GitHub Actions pipeline or run:
-```bash
-flutter build apk --release
-```
+*(Note: To fully test offline transfers, you will need two physical devices with the app installed).*
 
 ---
 
-## 📸 Screenshots
+## 🤝 Contributing
+Contributions, issues, and feature requests are welcome!
 
-*( )*
-
----
-
-<div align="center">
-  <p>Built with ❤️ by Harsh Kumar</p>
-</div>
+## 📝 License
+This project is open-source and available under the [MIT License](LICENSE).
