@@ -144,7 +144,8 @@ class _HomeTabState extends State<_HomeTab> {
   OfflineWallet? wallet;
   List<OfflineTransaction> transactions = [];
   bool _isSyncing = false;
-  bool _isOnline = false;
+  bool _isOnline = false; // True only if last API call succeeded
+  bool _hasNetworkStatus = false; // True if OS reports active connection
   StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
   Timer? _pollingTimer;
 
@@ -162,15 +163,24 @@ class _HomeTabState extends State<_HomeTab> {
 
     _connectivitySubscription = Connectivity().onConnectivityChanged.listen((List<ConnectivityResult> results) {
       final isConnected = !results.contains(ConnectivityResult.none);
-      if (mounted && _isOnline != isConnected) {
-        setState(() => _isOnline = isConnected);
-        if (isConnected) _autoSync(); // Sync automatically when reconnecting!
+      if (mounted) {
+        setState(() {
+          _hasNetworkStatus = isConnected;
+          if (!isConnected) _isOnline = false;
+        });
+        
+        if (isConnected) {
+          // Wait for DNS/routing to fully settle before hitting API
+          Future.delayed(const Duration(seconds: 2), () {
+            if (mounted && !_isSyncing) _autoSync();
+          });
+        }
       }
     });
 
     // Start live polling for real-time escrow settlement updates
     _pollingTimer = Timer.periodic(const Duration(seconds: 3), (_) {
-      if (_isOnline && !_isSyncing) {
+      if (_hasNetworkStatus && !_isSyncing) {
         _autoSync();
       }
     });
