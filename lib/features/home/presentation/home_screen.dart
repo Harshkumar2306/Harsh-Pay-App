@@ -817,7 +817,7 @@ class _PaymentsHubState extends State<_PaymentsHub> {
               subtitle: 'Send money via Bluetooth / Wi-Fi Direct',
               gradient: [const Color(0xFF8B5CF6), const Color(0xFF6D28D9)],
               isDisabled: false, // Make it always available now that it's implemented
-              onTap: () => context.push('/radio-transfer'),
+              onTap: () => context.push('/radio'),
             ).animate().fadeIn(delay: 350.ms).slideY(begin: 0.1),
           ],
         ),
@@ -833,6 +833,7 @@ class _MethodCard extends StatelessWidget {
   final List<Color> gradient;
   final VoidCallback onTap;
   final bool isDisabled;
+  final bool showSoonBadge;
 
   const _MethodCard({
     required this.icon,
@@ -841,6 +842,7 @@ class _MethodCard extends StatelessWidget {
     required this.gradient,
     required this.onTap,
     this.isDisabled = false,
+    this.showSoonBadge = false,
   });
 
   @override
@@ -877,7 +879,7 @@ class _MethodCard extends StatelessWidget {
                     Row(
                       children: [
                         Text(title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
-                        if (isDisabled) ...[
+                        if (showSoonBadge) ...[
                           const SizedBox(width: 8),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
