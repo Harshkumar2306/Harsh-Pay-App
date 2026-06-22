@@ -225,12 +225,12 @@ class _HomeTabState extends State<_HomeTab> {
     if (data != null) {
       double cloudBalance = (data['syncedBalance'] as num?)?.toDouble() ?? wallet!.syncedBalance;
 
-      // Preserve local balance for transactions still waiting to be settled (e.g., WAITING_FOR_SENDER)
-      double pendingDelta = 0;
+      // Preserve local balance for DEBITS still waiting to be settled.
+      // CREDITS are NOT added to the balance until the backend completely verifies them via Zero-Trust!
+      double pendingDebits = 0;
       final currentUnsynced = transactions.where((tx) => !tx.isSynced).toList();
       for (var tx in currentUnsynced) {
-        if (tx.type == 'credit') pendingDelta += tx.amount;
-        if (tx.type == 'debit') pendingDelta -= tx.amount;
+        if (tx.type == 'debit') pendingDebits -= tx.amount;
       }
 
       // 1. Update wallet balance
@@ -239,7 +239,7 @@ class _HomeTabState extends State<_HomeTab> {
         appSyncId: data['appSyncId'] ?? wallet!.appSyncId,
         name: data['name'] ?? wallet!.name,
         email: data['email'] ?? wallet!.email,
-        syncedBalance: cloudBalance + pendingDelta,
+        syncedBalance: cloudBalance + pendingDebits,
       );
       await HiveSetup.saveWallet(updated);
 
