@@ -82,6 +82,29 @@ Both phones log this locally as a `PENDING` transaction. **Balances do not drop 
 
 ---
 
+## 📖 User Guide: How to Setup & Pair
+
+Because Harsh Pay uses a Zero-Trust local vault, your mobile app must be securely "paired" with your cloud account before you can go offline.
+
+1. **Create your Cloud Account:**
+   - On a computer or phone, go to the Web Dashboard: [https://harsh-bank.vercel.app](https://harsh-bank.vercel.app)
+   - Click **Sign Up** to create your secure account.
+   - You will automatically be granted a starting balance in the cloud.
+
+2. **Generate your App Sync ID:**
+   - Once logged into the website, navigate to the **Security Profile** tab.
+   - Click to reveal or generate your **App Sync ID QR Code**. This is your secure token.
+
+3. **Pair the Mobile App:**
+   - Open the Harsh Pay app on your phone.
+   - Tap **"I have an account"** or scan the QR Code from your computer screen.
+   - The app will instantly download your encrypted `OfflineWallet` and recent transactions into the Hive database.
+   
+4. **Go Offline & Transact:**
+   - You can now turn on Airplane mode or head into the wilderness. Use **Radio Transfer** or **Scan & Pay** to move money. Your local vault will hold the checks until you regain an internet connection!
+
+---
+
 ## 🤝 Contributing
 Contributions, issues, and feature requests are welcome!
 
