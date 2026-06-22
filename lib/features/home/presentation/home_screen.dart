@@ -225,13 +225,8 @@ class _HomeTabState extends State<_HomeTab> {
     if (data != null) {
       double cloudBalance = (data['syncedBalance'] as num?)?.toDouble() ?? wallet!.syncedBalance;
 
-      // Preserve local balance for DEBITS still waiting to be settled.
-      // CREDITS are NOT added to the balance until the backend completely verifies them via Zero-Trust!
-      double pendingDebits = 0;
-      final currentUnsynced = transactions.where((tx) => !tx.isSynced).toList();
-      for (var tx in currentUnsynced) {
-        if (tx.type == 'debit') pendingDebits -= tx.amount;
-      }
+      // In the Two-Way Escrow model, local pending transactions (both credit and debit) 
+      // DO NOT affect the available balance. The local balance strictly mirrors the cloud.
 
       // 1. Update wallet balance
       final updated = OfflineWallet(
@@ -239,7 +234,7 @@ class _HomeTabState extends State<_HomeTab> {
         appSyncId: data['appSyncId'] ?? wallet!.appSyncId,
         name: data['name'] ?? wallet!.name,
         email: data['email'] ?? wallet!.email,
-        syncedBalance: cloudBalance + pendingDebits,
+        syncedBalance: cloudBalance,
       );
       await HiveSetup.saveWallet(updated);
 

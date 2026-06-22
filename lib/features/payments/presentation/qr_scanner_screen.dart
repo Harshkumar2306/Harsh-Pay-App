@@ -285,9 +285,9 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
 
   Future<void> _executeOfflineTransfer(dynamic wallet, Map<String, dynamic> payload, double amount) async {
     try {
-      wallet.syncedBalance -= amount;
-      await HiveSetup.saveWallet(wallet);
-
+      // NOTE: We DO NOT subtract from wallet.syncedBalance here! 
+      // The balance will only update after Zero-Trust escrow verification completes on the backend during sync.
+      
       final txId = const Uuid().v4();
       final receiverId = payload['clerkId'] ?? 'unknown';
       final senderId = wallet.clerkId;
