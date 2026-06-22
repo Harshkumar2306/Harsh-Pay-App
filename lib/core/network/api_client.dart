@@ -66,8 +66,15 @@ class ApiClient {
       }
       // Server returned an error (e.g. insufficient balance)
       return {'error': response.data['error'] ?? 'Payment failed'};
+    } on DioException catch (e) {
+      if (e.response != null && e.response?.data != null) {
+        if (e.response?.data is Map) {
+          return {'error': e.response?.data['error'] ?? 'Payment failed'};
+        }
+      }
+      // True Network failure — return null so caller knows to go offline
+      return null;
     } catch (e) {
-      // Network failure — return null so caller knows to go offline
       return null;
     }
   }
