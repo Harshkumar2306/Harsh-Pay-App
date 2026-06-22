@@ -112,7 +112,7 @@ class _OnlineSendMoneyScreenState extends State<OnlineSendMoneyScreen> {
       txId: res['transactionId'] ?? 'ONLINE_${DateTime.now().millisecondsSinceEpoch}',
       type: 'debit',
       amount: amount,
-      title: 'Transfer to $email',
+      title: res['title'] ?? (note.isNotEmpty ? note : 'Transfer to $email'),
       timestamp: DateTime.now().millisecondsSinceEpoch,
       isSynced: true,
     );
