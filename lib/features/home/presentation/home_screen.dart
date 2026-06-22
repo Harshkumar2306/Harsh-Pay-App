@@ -742,8 +742,33 @@ class _TxTile extends StatelessWidget {
 // ─────────────────────────────────────────
 // Payments Hub Tab
 // ─────────────────────────────────────────
-class _PaymentsHub extends StatelessWidget {
+class _PaymentsHub extends StatefulWidget {
   const _PaymentsHub();
+
+  @override
+  State<_PaymentsHub> createState() => _PaymentsHubState();
+}
+
+class _PaymentsHubState extends State<_PaymentsHub> {
+  bool _isOnline = true;
+  StreamSubscription<List<ConnectivityResult>>? _connectivitySub;
+
+  @override
+  void initState() {
+    super.initState();
+    Connectivity().checkConnectivity().then((results) {
+      if (mounted) setState(() => _isOnline = !results.contains(ConnectivityResult.none));
+    });
+    _connectivitySub = Connectivity().onConnectivityChanged.listen((results) {
+      if (mounted) setState(() => _isOnline = !results.contains(ConnectivityResult.none));
+    });
+  }
+
+  @override
+  void dispose() {
+    _connectivitySub?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -762,9 +787,12 @@ class _PaymentsHub extends StatelessWidget {
             _MethodCard(
               icon: Icons.send_rounded,
               title: 'Send Money Online',
-              subtitle: 'Send money instantly using an email address',
+              subtitle: _isOnline ? 'Send money instantly using an email address' : 'Connect to internet to use online transfer',
               gradient: [const Color(0xFFF59E0B), const Color(0xFFD97706)],
-              onTap: () => context.push('/send-money-online'),
+              isDisabled: !_isOnline,
+              onTap: () {
+                if (_isOnline) context.push('/send-money-online');
+              },
             ).animate().fadeIn(delay: 120.ms).slideY(begin: 0.1),
             const SizedBox(height: 14),
             _MethodCard(
@@ -786,10 +814,10 @@ class _PaymentsHub extends StatelessWidget {
             _MethodCard(
               icon: Icons.wifi_tethering_rounded,
               title: 'Radio Transfer',
-              subtitle: 'Bluetooth / Wi-Fi Direct — Coming in next update',
-              gradient: [const Color(0xFF6B7280), const Color(0xFF4B5563)],
-              isDisabled: true,
-              onTap: () {},
+              subtitle: 'Send money via Bluetooth / Wi-Fi Direct',
+              gradient: [const Color(0xFF8B5CF6), const Color(0xFF6D28D9)],
+              isDisabled: false, // Make it always available now that it's implemented
+              onTap: () => context.push('/radio-transfer'),
             ).animate().fadeIn(delay: 350.ms).slideY(begin: 0.1),
           ],
         ),
