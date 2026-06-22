@@ -35,22 +35,24 @@ class _RadioTransferScreenState extends State<RadioTransferScreen> with TickerPr
   }
 
   void _setupCallbacks() {
-    _nearbyService.onUserFound = (userName) {
+    _nearbyService.onUserFound = (endpointInfo) {
       if (mounted) {
+        final realName = endpointInfo.split('::')[0];
         setState(() {
-          _discoveredUser = userName;
-          _statusMessage = 'Found $userName nearby!';
+          _discoveredUser = endpointInfo; // Store full info for sending
+          _statusMessage = 'Found $realName nearby!';
         });
         HapticFeedback.mediumImpact();
       }
     };
 
-    _nearbyService.onEndpointFound = (endpointId, userName) {
+    _nearbyService.onEndpointFound = (endpointId, endpointInfo) {
       if (mounted) {
+        final realName = endpointInfo.split('::')[0];
         setState(() {
           _discoveredEndpointId = endpointId;
-          _discoveredUser = userName;
-          _statusMessage = 'Connected to $userName — enter amount and send!';
+          _discoveredUser = endpointInfo; // Store full info for sending
+          _statusMessage = 'Connected to $realName — enter amount and send!';
         });
         HapticFeedback.mediumImpact();
       }
@@ -120,9 +122,10 @@ class _RadioTransferScreenState extends State<RadioTransferScreen> with TickerPr
 
     HapticFeedback.heavyImpact();
     await _nearbyService.sendMoneyOverRadio(_discoveredEndpointId!, amount, _discoveredUser ?? 'Unknown');
+    final realName = _discoveredUser?.split('::')[0] ?? 'Unknown';
     setState(() {
       _transferSuccess = true;
-      _statusMessage = 'Sent ₹$amount to $_discoveredUser over Radio!';
+      _statusMessage = 'Sent ₹$amount to $realName over Radio!\\n(Pending Escrow Verification)';
     });
   }
 

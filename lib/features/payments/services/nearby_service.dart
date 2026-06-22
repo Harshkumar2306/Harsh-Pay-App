@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:nearby_connections/nearby_connections.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:uuid/uuid.dart';
 import '../../../core/db/hive_setup.dart';
 import '../../../core/db/models/offline_transaction.dart';
@@ -15,13 +16,28 @@ class NearbyTransferService {
   Function(String payload)? onTransferReceived;
   Function(String msg)? onError;
 
+  Future<void> _checkPermissions() async {
+    await [
+      Permission.location,
+      Permission.bluetooth,
+      Permission.bluetoothAdvertise,
+      Permission.bluetoothConnect,
+      Permission.bluetoothScan,
+      Permission.nearbyWifiDevices,
+    ].request();
+  }
+
   Future<void> startAdvertising() async {
     try {
+      await _checkPermissions();
       final wallet = HiveSetup.getWallet();
       if (wallet == null) return;
 
+      // Broadcast both name and clerkId for Zero-Trust routing
+      final endpointName = '${wallet.name}::${wallet.clerkId}';
+
       bool a = await Nearby().startAdvertising(
-        wallet.name,
+        endpointName,
         strategy,
         onConnectionInitiated: (String id, ConnectionInfo info) {
           // Auto-accept connection
@@ -47,18 +63,26 @@ class NearbyTransferService {
 
   Future<void> startDiscovering() async {
     try {
+      await _checkPermissions();
       final wallet = HiveSetup.getWallet();
       if (wallet == null) return;
 
+      final endpointName = '${wallet.name}::${wallet.clerkId}';
+
       bool a = await Nearby().startDiscovery(
-        wallet.name,
+        endpointName,
         strategy,
-        onEndpointFound: (String id, String userName, String serviceId) {
+        onEndpointFound: (String id, String endpointInfo, String serviceId) {
+          // Parse name and clerkId from endpointInfo
+          final parts = endpointInfo.split('::');
+          final userName = parts[0];
+
           onUserFound?.call(userName);
-          onEndpointFound?.call(id, userName); // Pass ID back to UI
+          // Pass clerkId disguised as the userName string to the UI or store it
+          onEndpointFound?.call(id, endpointInfo); 
           // Request connection instantly
           Nearby().requestConnection(
-            wallet.name,
+            endpointName,
             id,
             onConnectionInitiated: (id, info) {
               Nearby().acceptConnection(
@@ -79,7 +103,7 @@ class NearbyTransferService {
     }
   }
 
-  Future<void> sendMoneyOverRadio(String targetEndpointId, double amount, String targetName) async {
+  Future<void> sendMoneyOverRadio(String targetEndpointId, double amount, String endpointInfo) async {
     final wallet = HiveSetup.getWallet();
     if (wallet == null) return;
 
@@ -88,25 +112,34 @@ class NearbyTransferService {
       return;
     }
 
-    // 1. Deduct locally
-    wallet.syncedBalance -= amount;
-    await HiveSetup.saveWallet(wallet);
+    final parts = endpointInfo.split('::');
+    final targetName = parts[0];
+    final receiverId = parts.length > 1 ? parts[1] : 'unknown';
+
+    // TWO-WAY ESCROW: Do NOT deduct locally!
+    final txId = const Uuid().v4();
+    final senderId = wallet.clerkId;
+    final now = DateTime.now().millisecondsSinceEpoch;
+    final encodedTxId = '$txId::$receiverId::$senderId';
 
     // 2. Save offline transaction
     final tx = OfflineTransaction(
-      txId: const Uuid().v4(),
+      txId: encodedTxId,
       type: 'debit',
       amount: amount,
       title: 'Radio transfer to $targetName',
-      timestamp: DateTime.now().millisecondsSinceEpoch,
+      timestamp: now,
       isSynced: false,
     );
     await HiveSetup.saveTransaction(tx);
 
     // 3. Beam over radio
     final payloadData = {
-      'txId': tx.txId,
+      'txId': encodedTxId,
       'senderName': wallet.name,
+      'senderId': senderId,
+      'receiverId': receiverId,
+      'timestamp': now,
       'amount': amount,
     };
     Nearby().sendBytesPayload(
@@ -120,24 +153,24 @@ class NearbyTransferService {
       final data = jsonDecode(jsonPayload);
       final double amount = (data['amount'] as num).toDouble();
       final String senderName = data['senderName'];
+      final String txId = data['txId'];
+      final int txTimestamp = data['timestamp'] ?? DateTime.now().millisecondsSinceEpoch;
 
       final wallet = HiveSetup.getWallet();
       if (wallet != null) {
-        wallet.syncedBalance += amount;
-        await HiveSetup.saveWallet(wallet);
-
+        // TWO-WAY ESCROW: Do NOT add to syncedBalance!
         final tx = OfflineTransaction(
-          txId: data['txId'] ?? const Uuid().v4(),
+          txId: txId,
           type: 'credit',
           amount: amount,
           title: 'Received offline from $senderName',
-          timestamp: DateTime.now().millisecondsSinceEpoch,
+          timestamp: txTimestamp,
           isSynced: false,
         );
         await HiveSetup.saveTransaction(tx);
       }
 
-      onTransferReceived?.call('Received ₹$amount over radio from $senderName');
+      onTransferReceived?.call('Received ₹$amount over radio from $senderName\\n(Pending Escrow Verification)');
     } catch (e) {
       onError?.call('Failed to parse incoming radio money');
     }
