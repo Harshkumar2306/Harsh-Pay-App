@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/db/hive_setup.dart';
 import '../../../core/db/models/offline_transaction.dart';
@@ -19,7 +20,20 @@ class _TransactionHistoryTabState extends State<TransactionHistoryTab> {
   @override
   void initState() {
     super.initState();
-    allTransactions = HiveSetup.getTransactions();
+    _loadLocal();
+    Hive.box<OfflineTransaction>(HiveSetup.transactionsBox).listenable().addListener(_loadLocal);
+  }
+
+  void _loadLocal() {
+    setState(() {
+      allTransactions = HiveSetup.getTransactions();
+    });
+  }
+
+  @override
+  void dispose() {
+    Hive.box<OfflineTransaction>(HiveSetup.transactionsBox).listenable().removeListener(_loadLocal);
+    super.dispose();
   }
 
   @override

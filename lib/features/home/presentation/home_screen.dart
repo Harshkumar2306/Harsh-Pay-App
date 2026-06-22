@@ -152,6 +152,12 @@ class _HomeTabState extends State<_HomeTab> {
     _loadLocal();
     _autoSync();
 
+    final wBox = Hive.box<OfflineWallet>(HiveSetup.walletBox);
+    final tBox = Hive.box<OfflineTransaction>(HiveSetup.transactionsBox);
+    
+    wBox.listenable().addListener(_loadLocal);
+    tBox.listenable().addListener(_loadLocal);
+
     _connectivitySubscription = Connectivity().onConnectivityChanged.listen((List<ConnectivityResult> results) {
       final isConnected = !results.contains(ConnectivityResult.none);
       if (mounted && _isOnline != isConnected) {
@@ -163,6 +169,11 @@ class _HomeTabState extends State<_HomeTab> {
 
   @override
   void dispose() {
+    final wBox = Hive.box<OfflineWallet>(HiveSetup.walletBox);
+    final tBox = Hive.box<OfflineTransaction>(HiveSetup.transactionsBox);
+    wBox.listenable().removeListener(_loadLocal);
+    tBox.listenable().removeListener(_loadLocal);
+    
     _connectivitySubscription?.cancel();
     super.dispose();
   }
