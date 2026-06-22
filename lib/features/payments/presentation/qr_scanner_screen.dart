@@ -205,7 +205,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
     );
   }
 
-  Future<void> _executeTransfer(Map<String, dynamic> payload, double amount) async {
+  Future<void> _executeTransfer(Map<String, dynamic> payload, double amount, {bool forceOffline = true}) async {
     try {
       final wallet = HiveSetup.getWallet();
       if (wallet == null) {
@@ -225,7 +225,8 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
       );
       final bool isOnline = !connectivityResult.contains(ConnectivityResult.none);
 
-    if (isOnline) {
+    // If we are forcing an offline transfer (because we scanned an offline QR), skip online logic entirely!
+    if (isOnline && !forceOffline) {
       // ───────────────────────────────────────────────
       // ONLINE MODE — Instant UPI-style cloud payment
       // ───────────────────────────────────────────────
