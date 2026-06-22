@@ -39,6 +39,7 @@ class NearbyTransferService {
       bool a = await Nearby().startAdvertising(
         endpointName,
         strategy,
+        serviceId: 'harshpay',
         onConnectionInitiated: (String id, ConnectionInfo info) {
           // Auto-accept connection
           Nearby().acceptConnection(
@@ -72,6 +73,7 @@ class NearbyTransferService {
       bool a = await Nearby().startDiscovery(
         endpointName,
         strategy,
+        serviceId: 'harshpay',
         onEndpointFound: (String id, String endpointInfo, String serviceId) {
           // Parse name and clerkId from endpointInfo
           final parts = endpointInfo.split('::');
