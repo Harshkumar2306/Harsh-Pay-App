@@ -218,9 +218,12 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
         return;
       }
 
-      // Check if we are online
-      final connectivityResult = await Connectivity().checkConnectivity();
-    final bool isOnline = !connectivityResult.contains(ConnectivityResult.none);
+      // Check if we are online (with a 2-second timeout to prevent iOS hangs)
+      final connectivityResult = await Connectivity().checkConnectivity().timeout(
+        const Duration(seconds: 2),
+        onTimeout: () => [ConnectivityResult.none],
+      );
+      final bool isOnline = !connectivityResult.contains(ConnectivityResult.none);
 
     if (isOnline) {
       // ───────────────────────────────────────────────
