@@ -223,13 +223,23 @@ class _HomeTabState extends State<_HomeTab> {
     final data = await ApiClient().fetchWalletData(wallet!.appSyncId);
     if (!mounted) return;
     if (data != null) {
+      double cloudBalance = (data['syncedBalance'] as num?)?.toDouble() ?? wallet!.syncedBalance;
+
+      // Preserve local balance for transactions still waiting to be settled (e.g., WAITING_FOR_SENDER)
+      double pendingDelta = 0;
+      final currentUnsynced = transactions.where((tx) => !tx.isSynced).toList();
+      for (var tx in currentUnsynced) {
+        if (tx.type == 'credit') pendingDelta += tx.amount;
+        if (tx.type == 'debit') pendingDelta -= tx.amount;
+      }
+
       // 1. Update wallet balance
       final updated = OfflineWallet(
         clerkId: data['clerkId'] ?? wallet!.clerkId,
         appSyncId: data['appSyncId'] ?? wallet!.appSyncId,
         name: data['name'] ?? wallet!.name,
         email: data['email'] ?? wallet!.email,
-        syncedBalance: (data['syncedBalance'] as num?)?.toDouble() ?? wallet!.syncedBalance,
+        syncedBalance: cloudBalance + pendingDelta,
       );
       await HiveSetup.saveWallet(updated);
 
