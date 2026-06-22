@@ -19,6 +19,7 @@ import '../../../presentation/widgets/glass_container.dart';
 import './widgets/offline_hub_sheet.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'dart:async';
+import '../../transactions/presentation/widgets/transaction_details_sheet.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -672,51 +673,67 @@ class _TxTile extends StatelessWidget {
     final isCredit = tx.type == 'credit';
     final fmt = NumberFormat.currency(locale: 'en_IN', symbol: '₹ ');
     final date = DateTime.fromMillisecondsSinceEpoch(tx.timestamp);
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 44, height: 44,
-            decoration: BoxDecoration(
-              color: isCredit ? AppColors.primary.withValues(alpha: 0.15) : Colors.red.withValues(alpha: 0.10),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(
-              isCredit ? Icons.south_west_rounded : Icons.north_east_rounded,
-              color: isCredit ? AppColors.primary : Colors.redAccent,
-              size: 20,
-            ),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(tx.title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.white)),
-              const SizedBox(height: 3),
-              Text(
-                DateFormat('dd MMM, hh:mm a').format(date),
-                style: const TextStyle(color: AppColors.textSecondary, fontSize: 11),
+    
+    String displayTitle = tx.title;
+    if (tx.title.contains('::NOTE::')) {
+      displayTitle = tx.title.split('::NOTE::')[0];
+    }
+
+    return GestureDetector(
+      onTap: () {
+        showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
+          builder: (context) => TransactionDetailsSheet(tx: tx),
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: AppColors.border),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 44, height: 44,
+              decoration: BoxDecoration(
+                color: isCredit ? AppColors.primary.withValues(alpha: 0.15) : Colors.red.withValues(alpha: 0.10),
+                borderRadius: BorderRadius.circular(12),
               ),
-            ]),
-          ),
-          Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-            Text(
-              '${isCredit ? '+' : '-'} ${fmt.format(tx.amount)}',
-              style: TextStyle(
-                fontWeight: FontWeight.w900, fontSize: 15,
+              child: Icon(
+                isCredit ? Icons.south_west_rounded : Icons.north_east_rounded,
                 color: isCredit ? AppColors.primary : Colors.redAccent,
+                size: 20,
               ),
             ),
-            if (!tx.isSynced)
-              const Text('Pending', style: TextStyle(color: Colors.orange, fontSize: 10, fontWeight: FontWeight.bold)),
-          ]),
-        ],
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text(displayTitle, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.white)),
+                const SizedBox(height: 3),
+                Text(
+                  DateFormat('dd MMM, hh:mm a').format(date),
+                  style: const TextStyle(color: AppColors.textSecondary, fontSize: 11),
+                ),
+              ]),
+            ),
+            Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
+              Text(
+                '${isCredit ? '+' : '-'} ${fmt.format(tx.amount)}',
+                style: TextStyle(
+                  fontWeight: FontWeight.w900, fontSize: 15,
+                  color: isCredit ? AppColors.primary : Colors.redAccent,
+                ),
+              ),
+              if (!tx.isSynced)
+                const Text('Pending', style: TextStyle(color: Colors.orange, fontSize: 10, fontWeight: FontWeight.bold)),
+            ]),
+          ],
+        ),
       ),
     );
   }

@@ -4,6 +4,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/db/hive_setup.dart';
 import '../../../core/db/models/offline_transaction.dart';
+import './widgets/transaction_details_sheet.dart';
 
 class TransactionHistoryTab extends StatefulWidget {
   const TransactionHistoryTab({super.key});
@@ -121,55 +122,67 @@ class _TransactionHistoryTabState extends State<TransactionHistoryTab> {
                 final tx = filteredTransactions[index];
                 final isCredit = tx.type == 'credit';
                 final date = DateTime.fromMillisecondsSinceEpoch(tx.timestamp);
-                
-                return Container(
-                  margin: const EdgeInsets.only(bottom: 16),
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: AppColors.surface,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: AppColors.border),
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: AppColors.background,
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: AppColors.border),
+                      
+                String displayTitle = tx.title;
+                if (tx.title.contains('::NOTE::')) {
+                  displayTitle = tx.title.split('::NOTE::')[0];
+                }
+
+                return GestureDetector(
+                  onTap: () {
+                    showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      backgroundColor: Colors.transparent,
+                      builder: (context) => TransactionDetailsSheet(tx: tx),
+                    );
+                  },
+                  child: Container(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: AppColors.surface,
+                      borderRadius: BorderRadius.circular(18),
+                      border: Border.all(color: AppColors.border),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 44, height: 44,
+                          decoration: BoxDecoration(
+                            color: isCredit ? AppColors.primary.withValues(alpha: 0.15) : Colors.red.withValues(alpha: 0.10),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Icon(
+                            isCredit ? Icons.south_west_rounded : Icons.north_east_rounded,
+                            color: isCredit ? AppColors.primary : Colors.redAccent,
+                            size: 20,
+                          ),
                         ),
-                        child: Icon(
-                          isCredit ? Icons.south_west_rounded : Icons.north_east_rounded,
-                          color: isCredit ? AppColors.primary : AppColors.textPrimary,
-                          size: 20,
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                            Text(displayTitle, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.white)),
+                            const SizedBox(height: 3),
+                            Text(
+                              DateFormat('dd MMM, hh:mm a').format(date),
+                              style: const TextStyle(color: AppColors.textSecondary, fontSize: 11),
+                            ),
+                          ]),
                         ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(tx.title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-                            const SizedBox(height: 4),
-                            Text(DateFormat('dd MMM yyyy, hh:mm a').format(date), style: const TextStyle(color: AppColors.textSecondary, fontSize: 12)),
-                            if (!tx.isSynced)
-                              Padding(
-                                padding: const EdgeInsets.only(top: 4.0),
-                                child: Text('Pending Sync', style: TextStyle(color: Colors.orange.withValues(alpha: 0.8), fontSize: 10, fontWeight: FontWeight.bold)),
-                              ),
-                          ],
-                        ),
-                      ),
-                      Text(
-                        '${isCredit ? '+' : '-'} ${formatter.format(tx.amount)}',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w900,
-                          fontSize: 16,
-                          color: isCredit ? AppColors.primary : AppColors.textPrimary,
-                        ),
-                      ),
-                    ],
+                        Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
+                          Text(
+                            '${isCredit ? '+' : '-'} ${formatter.format(tx.amount)}',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w900, fontSize: 15,
+                              color: isCredit ? AppColors.primary : Colors.redAccent,
+                            ),
+                          ),
+                          if (!tx.isSynced)
+                            const Text('Pending', style: TextStyle(color: Colors.orange, fontSize: 10, fontWeight: FontWeight.bold)),
+                        ]),
+                      ],
+                    ),
                   ),
                 );
               },
