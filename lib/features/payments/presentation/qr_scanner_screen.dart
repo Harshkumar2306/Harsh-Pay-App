@@ -327,24 +327,27 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.surface,
         title: const Text('Show this to Receiver', textAlign: TextAlign.center, style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text('Have them scan this to claim the funds offline instantly.', textAlign: TextAlign.center, style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
-            const SizedBox(height: 24),
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
-              child: QrImageView(
-                data: qrData,
-                version: QrVersions.auto,
-                size: 200.0,
-                backgroundColor: Colors.white,
+        content: SizedBox(
+          width: 280,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('Have them scan this to claim the funds offline instantly.', textAlign: TextAlign.center, style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+              const SizedBox(height: 24),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
+                child: QrImageView(
+                  data: qrData,
+                  version: QrVersions.auto,
+                  size: 200.0,
+                  backgroundColor: Colors.white,
+                ),
               ),
-            ),
-            const SizedBox(height: 16),
-            Text('₹$amount', style: const TextStyle(color: AppColors.primary, fontSize: 32, fontWeight: FontWeight.w900)),
-          ],
+              const SizedBox(height: 16),
+              Text('₹$amount', style: const TextStyle(color: AppColors.primary, fontSize: 32, fontWeight: FontWeight.w900)),
+            ],
+          ),
         ),
         actions: [
           ElevatedButton(
