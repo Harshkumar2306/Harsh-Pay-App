@@ -274,10 +274,11 @@ class _HomeTabState extends State<_HomeTab> {
   Future<void> _manualSync() async {
     if (wallet == null) return;
     HapticFeedback.mediumImpact();
-    setState(() => _isSyncing = true);
+    
+    // Call autoSync directly. It has its own _isSyncing guard and state management.
     await _autoSync();
+    
     if (!mounted) return;
-    setState(() => _isSyncing = false);
     HapticFeedback.heavyImpact();
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
