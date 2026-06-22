@@ -798,26 +798,34 @@ class _PaymentsHubState extends State<_PaymentsHub> {
             _MethodCard(
               icon: Icons.qr_code_rounded,
               title: 'Scan QR Code',
-              subtitle: 'Scan a friend\'s code to pay them offline instantly',
+              subtitle: _isOnline ? 'Turn off internet to use offline vault' : 'Scan a friend\'s code to pay them offline instantly',
               gradient: [const Color(0xFF10B981), const Color(0xFF059669)],
-              onTap: () => context.push('/scan-qr'),
+              isDisabled: _isOnline,
+              onTap: () {
+                if (!_isOnline) context.push('/scan-qr');
+              },
             ).animate().fadeIn(delay: 150.ms).slideY(begin: 0.1),
             const SizedBox(height: 14),
             _MethodCard(
               icon: Icons.call_received_rounded,
               title: 'Receive Money',
-              subtitle: 'Show your QR code for someone to scan and pay you',
+              subtitle: _isOnline ? 'Turn off internet to use offline vault' : 'Show your QR code for someone to scan and pay you',
               gradient: [const Color(0xFF3B82F6), const Color(0xFF1D4ED8)],
-              onTap: () => context.push('/receive-money'),
+              isDisabled: _isOnline,
+              onTap: () {
+                if (!_isOnline) context.push('/receive-money');
+              },
             ).animate().fadeIn(delay: 250.ms).slideY(begin: 0.1),
             const SizedBox(height: 14),
             _MethodCard(
               icon: Icons.wifi_tethering_rounded,
               title: 'Radio Transfer',
-              subtitle: 'Send money via Bluetooth / Wi-Fi Direct',
+              subtitle: _isOnline ? 'Turn off internet to use offline vault' : 'Send money via Bluetooth / Wi-Fi Direct',
               gradient: [const Color(0xFF8B5CF6), const Color(0xFF6D28D9)],
-              isDisabled: false, // Make it always available now that it's implemented
-              onTap: () => context.push('/radio'),
+              isDisabled: _isOnline,
+              onTap: () {
+                if (!_isOnline) context.push('/radio');
+              },
             ).animate().fadeIn(delay: 350.ms).slideY(begin: 0.1),
           ],
         ),
