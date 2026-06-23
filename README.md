@@ -20,6 +20,40 @@ Built using **Flutter**, **Next.js**, **MongoDB**, **Clerk**, and **Google Nearb
 
 ---
 
+## 🏗️ System Architecture
+
+```mermaid
+graph TB
+    subgraph Mobile["Mobile App (Flutter)"]
+        UI["Harsh Pay App"]
+        HIVE[("Hive (Offline Local Vault)")]
+        UI -->|"Reads/Writes"| HIVE
+        UI -->|"Radio/QR Beaming"| OFFLINE["Offline P2P Handshake"]
+        OFFLINE -->|"Generates PENDING txId"| HIVE
+    end
+
+    subgraph Backend["Cloud Backend (Next.js on Vercel)"]
+        API["Serverless Sync API"]
+        API -->|"Zero-Trust Math"| ESCROW{"Cryptographic Match?"}
+        ESCROW -->|"Yes → Atomic Settlement"| DB
+        ESCROW -->|"No → PENDING Escrow"| DB
+    end
+
+    subgraph Infrastructure["Global Cloud Services"]
+        DB[("MongoDB Atlas")]
+        CLERK["Clerk Authentication"]
+        CLERK -->|"Webhook: Provision Wallet"| DB
+    end
+
+    UI -->|"Background Auto-Sync (When Wi-Fi restored)"| API
+
+    style Mobile fill:#dbeafe,stroke:#3b82f6,color:#1e3a5f
+    style Backend fill:#d1fae5,stroke:#10b981,color:#064e3b
+    style Infrastructure fill:#fef3c7,stroke:#f59e0b,color:#78350f
+```
+
+---
+
 ## 🌟 Features & Architecture
 
 ### 1. 📴 True Offline Payments (Optical & Radio)
