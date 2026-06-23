@@ -13,9 +13,10 @@
 Built using **Flutter**, **Next.js**, **MongoDB**, **Clerk**, and **Google Nearby Connections**.
 
 ### 🌐 Live Links
-- **📱 App Repository**: [GitHub - Harsh-Pay-App](https://github.com/Harshkumar2306/Harsh-Pay-App)
+- **📱 App Download (APK)**: [Download Latest Release](https://github.com/Harshkumar2306/Harsh-Pay-App/releases)
 - **💻 Web Dashboard**: [https://harsh-bank.vercel.app](https://harsh-bank.vercel.app)
 - **⚙️ Backend API**: `https://harsh-bank.vercel.app/api`
+- **📁 Source Code**: [GitHub Repository](https://github.com/Harshkumar2306/Harsh-Pay-App)
 
 ---
 
@@ -59,7 +60,12 @@ Built with a dark-mode-first glassmorphism design language.
 3. Open the Harsh Pay mobile app, tap **"I have an account"**, and scan the screen. 
 4. Your Hive database is now populated securely!
 
-### 2. Run the Mobile App
+### 2. Download or Build the Mobile App
+**Option A: Quick Download (Android Only)**
+1. Go to the [GitHub Releases Page](https://github.com/Harshkumar2306/Harsh-Pay-App/releases).
+2. Download the `app-release.apk` file and install it on your Android device.
+
+**Option B: Build from Source (iOS & Android)**
 ```bash
 git clone https://github.com/Harshkumar2306/Harsh-Pay-App.git
 cd Harsh-Pay-App
