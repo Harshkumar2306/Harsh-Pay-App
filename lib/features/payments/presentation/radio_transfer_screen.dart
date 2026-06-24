@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -177,7 +178,7 @@ class _RadioTransferScreenState extends State<RadioTransferScreen> with TickerPr
         ],
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
+        child: Platform.isIOS ? _buildIosNotSupported() : SingleChildScrollView(
           padding: const EdgeInsets.all(24),
           child: Column(
             children: [
@@ -477,6 +478,50 @@ class _RadioTransferScreenState extends State<RadioTransferScreen> with TickerPr
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildIosNotSupported() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 100, height: 100,
+              decoration: BoxDecoration(
+                color: Colors.redAccent.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.apple_rounded, size: 50, color: Colors.redAccent),
+            ),
+            const SizedBox(height: 24),
+            const Text(
+              'iOS Not Supported Yet',
+              style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 12),
+            const Text(
+              'Radio Transfer (Nearby Connections) is currently an Android-exclusive feature. Cross-platform iOS support is coming in a future update!',
+              style: TextStyle(color: AppColors.textSecondary, fontSize: 14, height: 1.5),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 40),
+            ElevatedButton.icon(
+              onPressed: () => Navigator.pop(context),
+              icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
+              label: const Text('Go Back', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.surface,
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+          ],
+        ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.1),
       ),
     );
   }
