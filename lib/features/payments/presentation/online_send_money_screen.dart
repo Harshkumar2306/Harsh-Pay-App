@@ -204,14 +204,6 @@ class _OnlineSendMoneyScreenState extends State<OnlineSendMoneyScreen> {
         ),
         title: const Text('Send Money', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.qr_code_scanner_rounded, color: Colors.white),
-            onPressed: () => context.push('/qr-scanner'),
-            tooltip: 'Scan QR Code',
-          ),
-          const SizedBox(width: 8),
-        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
@@ -371,6 +363,29 @@ class _OnlineSendMoneyScreenState extends State<OnlineSendMoneyScreen> {
                       ),
               ),
             ).animate().fadeIn(delay: 400.ms).slideY(begin: 0.1),
+            const SizedBox(height: 16),
+            // Scan QR Button
+            SizedBox(
+              width: double.infinity,
+              height: 56,
+              child: OutlinedButton(
+                onPressed: () => context.push('/scan-qr'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  side: const BorderSide(color: AppColors.border),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                ),
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.qr_code_scanner_rounded),
+                    SizedBox(width: 8),
+                    Text('Scan QR to Pay', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  ],
+                ),
+              ),
+            ).animate().fadeIn(delay: 500.ms).slideY(begin: 0.1),
+            const SizedBox(height: 24),
           ],
         ),
       ),
