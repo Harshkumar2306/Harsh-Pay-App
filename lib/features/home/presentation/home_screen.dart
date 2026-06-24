@@ -499,12 +499,17 @@ class _HomeTabState extends State<_HomeTab> {
                           border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
                         ),
                         child: Row(
-                          mainAxisSize: MainAxisSize.min,
                           children: [
                             const Icon(Icons.lock_rounded, color: Colors.orangeAccent, size: 16),
                             const SizedBox(width: 8),
-                            const Text('Offline Vault', style: TextStyle(color: Colors.orangeAccent, fontSize: 14, fontWeight: FontWeight.bold)),
-                            const Spacer(),
+                            const Expanded(
+                              child: Text(
+                                'Offline Vault', 
+                                style: TextStyle(color: Colors.orangeAccent, fontSize: 14, fontWeight: FontWeight.bold),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
                             Text(
                               wallet != null ? fmt.format(wallet!.lockedOfflineBalance) : '₹ 0.00',
                               style: const TextStyle(
@@ -549,12 +554,17 @@ class _HomeTabState extends State<_HomeTab> {
                           border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
                         ),
                         child: Row(
-                          mainAxisSize: MainAxisSize.min,
                           children: [
                             const Icon(Icons.cloud_off_rounded, color: Colors.white30, size: 16),
                             const SizedBox(width: 8),
-                            const Text('Available Balance (Unavailable)', style: TextStyle(color: Colors.white30, fontSize: 12)),
-                            const Spacer(),
+                            const Expanded(
+                              child: Text(
+                                'Available Balance (Unavailable)', 
+                                style: TextStyle(color: Colors.white30, fontSize: 12),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
                             Text(
                               wallet != null ? fmt.format(wallet!.syncedBalance) : '₹ 0.00',
                               style: const TextStyle(
