@@ -39,8 +39,8 @@
 
 ### 📴 True Offline Payments (Radio & Optical)
 Transfer funds without a single byte of internet. 
-- **Radio Transfers**: Harnesses Google's `nearby_connections` (Wi-Fi Direct & BLE) to broadcast and discover devices dynamically.
 - **Optical Transfers**: ML-powered `mobile_scanner` facilitates lightning-fast, hardware-agnostic QR code handshakes.
+- **Radio Transfers**: Harnesses Google's `nearby_connections` (Wi-Fi Direct & BLE) to broadcast and discover devices dynamically.
 
 ### 🔐 Zero-Trust Escrow Settlement Engine
 Traditional offline apps use "Optimistic" UI, which leads to rampant double-spending fraud. Harsh Pay inherently distrusts both the sender and receiver.
