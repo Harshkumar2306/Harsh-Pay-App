@@ -3,6 +3,7 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:go_router/go_router.dart';
 import 'package:uuid/uuid.dart';
 import 'dart:convert';
+import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../../../core/theme/app_colors.dart';
@@ -20,9 +21,34 @@ class QRScannerScreen extends StatefulWidget {
 class _QRScannerScreenState extends State<QRScannerScreen> {
   final MobileScannerController _scannerController = MobileScannerController();
   bool _isScanning = true;
+  bool _isOnline = true;
+  StreamSubscription<List<ConnectivityResult>>? _connectivitySub;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkInitialConnectivity();
+    _connectivitySub = Connectivity().onConnectivityChanged.listen((results) {
+      if (mounted) {
+        setState(() {
+          _isOnline = !results.contains(ConnectivityResult.none);
+        });
+      }
+    });
+  }
+
+  Future<void> _checkInitialConnectivity() async {
+    final results = await Connectivity().checkConnectivity();
+    if (mounted) {
+      setState(() {
+        _isOnline = !results.contains(ConnectivityResult.none);
+      });
+    }
+  }
 
   @override
   void dispose() {
+    _connectivitySub?.cancel();
     _scannerController.dispose();
     super.dispose();
   }
@@ -196,14 +222,14 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
                 _executeTransfer(payload, amt);
               }
             },
-            child: const Text('Send Offline', style: TextStyle(color: AppColors.background, fontWeight: FontWeight.bold)),
+            child: Text(_isOnline ? 'Send Online' : 'Send Offline', style: const TextStyle(color: AppColors.background, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
     );
   }
 
-  Future<void> _executeTransfer(Map<String, dynamic> payload, double amount, {bool forceOffline = true}) async {
+  Future<void> _executeTransfer(Map<String, dynamic> payload, double amount, {bool? forceOffline}) async {
     try {
       final wallet = HiveSetup.getWallet();
       if (wallet == null) {
@@ -217,7 +243,9 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
         onTimeout: () => [ConnectivityResult.none],
       );
       final bool isOnline = !connectivityResult.contains(ConnectivityResult.none);
-      final bool isOnlineTransfer = isOnline && !forceOffline;
+      
+      // If forceOffline is null, default to whatever the current network status dictates
+      final bool isOnlineTransfer = forceOffline == null ? isOnline : (isOnline && !forceOffline);
 
       if (isOnlineTransfer) {
         if (wallet.syncedBalance < amount) {
@@ -457,14 +485,16 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
               ),
             ),
           ),
-          const Positioned(
+          Positioned(
             bottom: 60,
             left: 0,
             right: 0,
             child: Text(
-              'Align QR code within the frame to send money offline',
+              _isOnline 
+                ? 'Align QR code within the frame to send money online'
+                : 'Align QR code within the frame to send money offline',
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+              style: const TextStyle(color: Colors.white54, fontSize: 14),
             ),
           )
         ],
