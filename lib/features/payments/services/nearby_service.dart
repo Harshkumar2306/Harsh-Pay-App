@@ -18,29 +18,43 @@ class NearbyTransferService {
   Function(String msg)? onError;
 
   Future<bool> _checkPermissions() async {
-    // Android requires GPS to be turned on for Nearby Connections
-    if (Platform.isAndroid && await Permission.location.serviceStatus.isDisabled) {
-      onError?.call('GPS/Location services are disabled. Please turn them on in Settings.');
-      return false;
+    if (Platform.isAndroid) {
+      // Android requires GPS to be turned on for Nearby Connections
+      if (await Permission.location.serviceStatus.isDisabled) {
+        onError?.call('GPS/Location services are disabled. Please turn them on in Settings.');
+        return false;
+      }
+
+      final statuses = await [
+        Permission.location,
+        Permission.bluetooth,
+        Permission.bluetoothAdvertise,
+        Permission.bluetoothConnect,
+        Permission.bluetoothScan,
+        Permission.nearbyWifiDevices,
+      ].request();
+
+      // Check if core permissions are granted
+      bool locGranted = statuses[Permission.location]?.isGranted ?? false;
+      bool btGranted = (statuses[Permission.bluetooth]?.isGranted ?? false) || 
+                       (statuses[Permission.bluetoothConnect]?.isGranted ?? false);
+
+      if (!locGranted || !btGranted) {
+        onError?.call('Location and Bluetooth permissions are required for Radio Transfer.');
+        return false;
+      }
+      return true;
+    } else if (Platform.isIOS) {
+      // On iOS, CoreBluetooth and Local Network Frameworks automatically prompt the user 
+      // when the Nearby Connections SDK initializes. We request here just in case, but don't strictly block.
+      await [
+        Permission.location,
+        Permission.bluetooth,
+      ].request();
+      return true;
     }
-
-    final statuses = await [
-      Permission.location,
-      Permission.bluetooth,
-      Permission.bluetoothAdvertise,
-      Permission.bluetoothConnect,
-      Permission.bluetoothScan,
-      Permission.nearbyWifiDevices,
-    ].request();
-
-    // Check if core permissions are granted
-    if (statuses[Permission.location]!.isGranted == false ||
-        statuses[Permission.bluetooth]!.isGranted == false) {
-      onError?.call('Location and Bluetooth permissions are required for Radio Transfer.');
-      return false;
-    }
-
-    return true;
+    
+    return false;
   }
 
   Future<void> startAdvertising() async {
