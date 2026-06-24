@@ -18,9 +18,27 @@ class HiveSetup {
     Hive.registerAdapter(NotificationEntityAdapter());
 
 
-    await Hive.openBox<OfflineWallet>(walletBox);
-    await Hive.openBox<OfflineTransaction>(transactionsBox);
-    await Hive.openBox<NotificationEntity>(notificationsBox);
+    // Resilient Box Opening (handles schema mismatches by wiping the local cache)
+    try {
+      await Hive.openBox<OfflineWallet>(walletBox);
+    } catch (e) {
+      await Hive.deleteBoxFromDisk(walletBox);
+      await Hive.openBox<OfflineWallet>(walletBox);
+    }
+
+    try {
+      await Hive.openBox<OfflineTransaction>(transactionsBox);
+    } catch (e) {
+      await Hive.deleteBoxFromDisk(transactionsBox);
+      await Hive.openBox<OfflineTransaction>(transactionsBox);
+    }
+
+    try {
+      await Hive.openBox<NotificationEntity>(notificationsBox);
+    } catch (e) {
+      await Hive.deleteBoxFromDisk(notificationsBox);
+      await Hive.openBox<NotificationEntity>(notificationsBox);
+    }
   }
 
   // ── Wallet ──────────────────────────────
