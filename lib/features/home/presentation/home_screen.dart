@@ -315,7 +315,8 @@ class _HomeTabState extends State<_HomeTab> {
 
   @override
   Widget build(BuildContext context) {
-    final recentTxs = transactions.take(3).toList();
+    final pendingTxs = transactions.where((t) => !t.isSynced).toList();
+    final completedTxs = transactions.where((t) => t.isSynced).take(4).toList();
     final fmt = NumberFormat.currency(locale: 'en_IN', symbol: '₹ ');
 
     return SingleChildScrollView(
@@ -474,94 +475,96 @@ class _HomeTabState extends State<_HomeTab> {
                 ),
                 const SizedBox(height: 16),
                 if (_isOnline) ...[
-                  // ONLINE VIEW: Main Cloud is huge, Offline Vault is small
-                  Row(
+                  // ONLINE VIEW: Available Balance huge, Offline Vault stacked below
+                  Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text('Main Cloud', style: TextStyle(color: Colors.white70, fontSize: 12)),
-                            const SizedBox(height: 4),
-                            Text(
-                              wallet != null ? fmt.format(wallet!.syncedBalance) : '₹ 0.00',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 36,
-                                fontWeight: FontWeight.w900,
-                                letterSpacing: -1.0,
-                              ),
-                            ),
-                          ],
+                      const Text('Available Balance', style: TextStyle(color: Colors.white70, fontSize: 14)),
+                      const SizedBox(height: 4),
+                      Text(
+                        wallet != null ? fmt.format(wallet!.syncedBalance) : '₹ 0.00',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 40,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: -1.0,
                         ),
                       ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Row(
-                            children: const [
-                              Icon(Icons.lock_rounded, color: Colors.orangeAccent, size: 12),
-                              SizedBox(width: 4),
-                              Text('Offline Vault', style: TextStyle(color: Colors.orangeAccent, fontSize: 12, fontWeight: FontWeight.bold)),
-                            ],
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            wallet != null ? fmt.format(wallet!.lockedOfflineBalance) : '₹ 0.00',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ).animate().fadeIn(duration: 300.ms),
-                ] else ...[
-                  // OFFLINE VIEW: Offline Vault is huge, Main Cloud is hidden/dimmed
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                      const SizedBox(height: 16),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                        decoration: BoxDecoration(
+                          color: Colors.orange.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            Row(
-                              children: const [
-                                Icon(Icons.lock_rounded, color: Colors.orangeAccent, size: 16),
-                                SizedBox(width: 6),
-                                Text('Active Offline Vault', style: TextStyle(color: Colors.orangeAccent, fontSize: 14, fontWeight: FontWeight.bold)),
-                              ],
-                            ),
-                            const SizedBox(height: 4),
+                            const Icon(Icons.lock_rounded, color: Colors.orangeAccent, size: 16),
+                            const SizedBox(width: 8),
+                            const Text('Offline Vault', style: TextStyle(color: Colors.orangeAccent, fontSize: 14, fontWeight: FontWeight.bold)),
+                            const Spacer(),
                             Text(
                               wallet != null ? fmt.format(wallet!.lockedOfflineBalance) : '₹ 0.00',
                               style: const TextStyle(
                                 color: Colors.white,
-                                fontSize: 36,
-                                fontWeight: FontWeight.w900,
-                                letterSpacing: -1.0,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
                           ],
                         ),
                       ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          const Text('Main Cloud (Unavailable)', style: TextStyle(color: Colors.white30, fontSize: 10)),
-                          const SizedBox(height: 4),
-                          Text(
-                            wallet != null ? fmt.format(wallet!.syncedBalance) : '₹ 0.00',
-                            style: const TextStyle(
-                              color: Colors.white30,
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                    ],
+                  ).animate().fadeIn(duration: 300.ms),
+                ] else ...[
+                  // OFFLINE VIEW: Offline Vault huge, Available Balance hidden/dimmed below
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: const [
+                          Icon(Icons.lock_rounded, color: Colors.orangeAccent, size: 20),
+                          SizedBox(width: 8),
+                          Text('Active Offline Vault', style: TextStyle(color: Colors.orangeAccent, fontSize: 16, fontWeight: FontWeight.bold)),
                         ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        wallet != null ? fmt.format(wallet!.lockedOfflineBalance) : '₹ 0.00',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 40,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: -1.0,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.05),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.cloud_off_rounded, color: Colors.white30, size: 16),
+                            const SizedBox(width: 8),
+                            const Text('Available Balance (Unavailable)', style: TextStyle(color: Colors.white30, fontSize: 12)),
+                            const Spacer(),
+                            Text(
+                              wallet != null ? fmt.format(wallet!.syncedBalance) : '₹ 0.00',
+                              style: const TextStyle(
+                                color: Colors.white30,
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ).animate().fadeIn(duration: 300.ms),
@@ -741,7 +744,7 @@ class _HomeTabState extends State<_HomeTab> {
           ).animate().fadeIn(delay: 400.ms),
           const SizedBox(height: 8),
 
-          if (recentTxs.isEmpty)
+          if (pendingTxs.isEmpty && completedTxs.isEmpty)
             Container(
               margin: const EdgeInsets.only(top: 8),
               padding: const EdgeInsets.all(28),
@@ -762,9 +765,23 @@ class _HomeTabState extends State<_HomeTab> {
                 ),
               ),
             ).animate().fadeIn(delay: 450.ms)
-          else
-            ...recentTxs.map((tx) => _TxTile(tx: tx)).toList()
-                .animate(interval: 80.ms).fadeIn(delay: 450.ms).slideX(begin: 0.08),
+          else ...[
+            if (pendingTxs.isNotEmpty) ...[
+              const Padding(
+                padding: EdgeInsets.only(top: 8, bottom: 12),
+                child: Text('PENDING ESCROW', style: TextStyle(color: Colors.orange, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.2)),
+              ),
+              ...pendingTxs.map((tx) => _TxTile(tx: tx)).toList().animate(interval: 80.ms).fadeIn(delay: 450.ms).slideX(begin: 0.08),
+            ],
+            if (completedTxs.isNotEmpty) ...[
+              if (pendingTxs.isNotEmpty) const SizedBox(height: 12),
+              const Padding(
+                padding: EdgeInsets.only(top: 8, bottom: 12),
+                child: Text('COMPLETED', style: TextStyle(color: AppColors.textSecondary, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.2)),
+              ),
+              ...completedTxs.map((tx) => _TxTile(tx: tx)).toList().animate(interval: 80.ms).fadeIn(delay: 450.ms).slideX(begin: 0.08),
+            ],
+          ],
         ],
       ),
     );

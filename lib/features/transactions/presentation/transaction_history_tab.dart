@@ -51,6 +51,9 @@ class _TransactionHistoryTabState extends State<TransactionHistoryTab> {
     
     final formatter = NumberFormat.currency(locale: 'en_IN', symbol: '₹ ');
 
+    final pendingTxs = filteredTransactions.where((t) => !t.isSynced).toList();
+    final completedTxs = filteredTransactions.where((t) => t.isSynced).toList();
+
     return Column(
       children: [
         // App Bar equivalent
@@ -115,80 +118,96 @@ class _TransactionHistoryTabState extends State<TransactionHistoryTab> {
         Expanded(
           child: filteredTransactions.isEmpty 
           ? const Center(child: Text('No transactions found', style: TextStyle(color: AppColors.textSecondary)))
-          : ListView.builder(
+          : ListView(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8).copyWith(bottom: 120),
-              itemCount: filteredTransactions.length,
-              itemBuilder: (context, index) {
-                final tx = filteredTransactions[index];
-                final isCredit = tx.type == 'credit';
-                final date = DateTime.fromMillisecondsSinceEpoch(tx.timestamp);
-                      
-                String displayTitle = tx.title;
-                if (tx.title.contains('::NOTE::')) {
-                  displayTitle = tx.title.split('::NOTE::')[0];
-                }
-
-                return GestureDetector(
-                  onTap: () {
-                    showModalBottomSheet(
-                      context: context,
-                      isScrollControlled: true,
-                      backgroundColor: Colors.transparent,
-                      builder: (context) => TransactionDetailsSheet(tx: tx),
-                    );
-                  },
-                  child: Container(
-                    margin: const EdgeInsets.only(bottom: 12),
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: AppColors.surface,
-                      borderRadius: BorderRadius.circular(18),
-                      border: Border.all(color: AppColors.border),
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 44, height: 44,
-                          decoration: BoxDecoration(
-                            color: isCredit ? AppColors.primary.withValues(alpha: 0.15) : Colors.red.withValues(alpha: 0.10),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Icon(
-                            isCredit ? Icons.south_west_rounded : Icons.north_east_rounded,
-                            color: isCredit ? AppColors.primary : Colors.redAccent,
-                            size: 20,
-                          ),
-                        ),
-                        const SizedBox(width: 14),
-                        Expanded(
-                          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                            Text(displayTitle, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.white)),
-                            const SizedBox(height: 3),
-                            Text(
-                              DateFormat('dd MMM, hh:mm a').format(date),
-                              style: const TextStyle(color: AppColors.textSecondary, fontSize: 11),
-                            ),
-                          ]),
-                        ),
-                        Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-                          Text(
-                            '${isCredit ? '+' : '-'} ${formatter.format(tx.amount)}',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w900, fontSize: 15,
-                              color: isCredit ? AppColors.primary : Colors.redAccent,
-                            ),
-                          ),
-                          if (!tx.isSynced)
-                            const Text('Pending', style: TextStyle(color: Colors.orange, fontSize: 10, fontWeight: FontWeight.bold)),
-                        ]),
-                      ],
-                    ),
+              children: [
+                if (pendingTxs.isNotEmpty) ...[
+                  const Padding(
+                    padding: EdgeInsets.only(top: 8, bottom: 12),
+                    child: Text('PENDING ESCROW', style: TextStyle(color: Colors.orange, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.2)),
                   ),
-                );
-              },
+                  ...pendingTxs.map((tx) => _buildTxTile(tx, formatter, context)),
+                ],
+                if (completedTxs.isNotEmpty) ...[
+                  if (pendingTxs.isNotEmpty) const SizedBox(height: 12),
+                  const Padding(
+                    padding: EdgeInsets.only(top: 8, bottom: 12),
+                    child: Text('COMPLETED', style: TextStyle(color: AppColors.textSecondary, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.2)),
+                  ),
+                  ...completedTxs.map((tx) => _buildTxTile(tx, formatter, context)),
+                ],
+              ],
             ),
         ),
       ],
+    );
+  }
+
+  Widget _buildTxTile(OfflineTransaction tx, NumberFormat formatter, BuildContext context) {
+    final isCredit = tx.type == 'credit';
+    final date = DateTime.fromMillisecondsSinceEpoch(tx.timestamp);
+          
+    String displayTitle = tx.title;
+    if (tx.title.contains('::NOTE::')) {
+      displayTitle = tx.title.split('::NOTE::')[0];
+    }
+
+    return GestureDetector(
+      onTap: () {
+        showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
+          builder: (context) => TransactionDetailsSheet(tx: tx),
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: AppColors.border),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 44, height: 44,
+              decoration: BoxDecoration(
+                color: isCredit ? AppColors.primary.withValues(alpha: 0.15) : Colors.red.withValues(alpha: 0.10),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                isCredit ? Icons.south_west_rounded : Icons.north_east_rounded,
+                color: isCredit ? AppColors.primary : Colors.redAccent,
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text(displayTitle, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.white)),
+                const SizedBox(height: 3),
+                Text(
+                  DateFormat('dd MMM, hh:mm a').format(date),
+                  style: const TextStyle(color: AppColors.textSecondary, fontSize: 11),
+                ),
+              ]),
+            ),
+            Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
+              Text(
+                '${isCredit ? '+' : '-'} ${formatter.format(tx.amount)}',
+                style: TextStyle(
+                  fontWeight: FontWeight.w900, fontSize: 15,
+                  color: isCredit ? AppColors.primary : Colors.redAccent,
+                ),
+              ),
+              if (!tx.isSynced)
+                const Text('Pending', style: TextStyle(color: Colors.orange, fontSize: 10, fontWeight: FontWeight.bold)),
+            ]),
+          ],
+        ),
+      ),
     );
   }
 }
