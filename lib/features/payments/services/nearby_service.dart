@@ -34,8 +34,8 @@ class NearbyTransferService {
     ].request();
 
     // Check if core permissions are granted
-    if (statuses[Permission.location] == PermissionStatus.denied ||
-        statuses[Permission.bluetooth] == PermissionStatus.denied) {
+    if (statuses[Permission.location]!.isGranted == false ||
+        statuses[Permission.bluetooth]!.isGranted == false) {
       onError?.call('Location and Bluetooth permissions are required for Radio Transfer.');
       return false;
     }

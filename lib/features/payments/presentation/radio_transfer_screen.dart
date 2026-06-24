@@ -85,11 +85,15 @@ class _RadioTransferScreenState extends State<RadioTransferScreen> with TickerPr
       _transferSuccess = false;
     });
     await _nearbyService.startAdvertising();
-    setState(() {
-      _isAdvertising = true;
-      _isLoading = false;
-      _statusMessage = 'Waiting for sender to find you...';
-    });
+    if (mounted) {
+      setState(() {
+        _isAdvertising = _nearbyService.isAdvertising;
+        _isLoading = false;
+        if (_isAdvertising) {
+          _statusMessage = 'Waiting for sender to find you...';
+        }
+      });
+    }
   }
 
   Future<void> _startSending() async {
@@ -101,11 +105,15 @@ class _RadioTransferScreenState extends State<RadioTransferScreen> with TickerPr
       _transferSuccess = false;
     });
     await _nearbyService.startDiscovering();
-    setState(() {
-      _isDiscovering = true;
-      _isLoading = false;
-      _statusMessage = 'Looking for receivers nearby...';
-    });
+    if (mounted) {
+      setState(() {
+        _isDiscovering = _nearbyService.isDiscovering;
+        _isLoading = false;
+        if (_isDiscovering) {
+          _statusMessage = 'Looking for receivers nearby...';
+        }
+      });
+    }
   }
 
   Future<void> _sendMoney() async {
