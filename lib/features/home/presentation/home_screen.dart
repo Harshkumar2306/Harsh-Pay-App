@@ -473,30 +473,31 @@ class _HomeTabState extends State<_HomeTab> {
                   ],
                 ),
                 const SizedBox(height: 16),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text('Main Cloud', style: TextStyle(color: Colors.white70, fontSize: 12)),
-                          const SizedBox(height: 4),
-                          Text(
-                            wallet != null ? fmt.format(wallet!.syncedBalance) : '₹ 0.00',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 28,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: -1.0,
+                if (_isOnline) ...[
+                  // ONLINE VIEW: Main Cloud is huge, Offline Vault is small
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('Main Cloud', style: TextStyle(color: Colors.white70, fontSize: 12)),
+                            const SizedBox(height: 4),
+                            Text(
+                              wallet != null ? fmt.format(wallet!.syncedBalance) : '₹ 0.00',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 36,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: -1.0,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           Row(
                             children: const [
@@ -510,16 +511,61 @@ class _HomeTabState extends State<_HomeTab> {
                             wallet != null ? fmt.format(wallet!.lockedOfflineBalance) : '₹ 0.00',
                             style: const TextStyle(
                               color: Colors.white,
-                              fontSize: 28,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: -1.0,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
                         ],
                       ),
-                    ),
-                  ],
-                ),
+                    ],
+                  ).animate().fadeIn(duration: 300.ms),
+                ] else ...[
+                  // OFFLINE VIEW: Offline Vault is huge, Main Cloud is hidden/dimmed
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: const [
+                                Icon(Icons.lock_rounded, color: Colors.orangeAccent, size: 16),
+                                SizedBox(width: 6),
+                                Text('Active Offline Vault', style: TextStyle(color: Colors.orangeAccent, fontSize: 14, fontWeight: FontWeight.bold)),
+                              ],
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              wallet != null ? fmt.format(wallet!.lockedOfflineBalance) : '₹ 0.00',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 36,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: -1.0,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          const Text('Main Cloud (Unavailable)', style: TextStyle(color: Colors.white30, fontSize: 10)),
+                          const SizedBox(height: 4),
+                          Text(
+                            wallet != null ? fmt.format(wallet!.syncedBalance) : '₹ 0.00',
+                            style: const TextStyle(
+                              color: Colors.white30,
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ).animate().fadeIn(duration: 300.ms),
+                ],
                 const SizedBox(height: 16),
                 if (_isOnline) ...[
                   GestureDetector(
