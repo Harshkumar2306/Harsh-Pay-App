@@ -74,6 +74,12 @@
 	<string>Harsh Pay uses Bluetooth to transfer money offline between nearby devices.</string>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>Harsh Pay uses local Wi-Fi to discover nearby devices for offline payments.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Harsh Pay needs location access to discover nearby devices via Bluetooth and Wi-Fi for offline transfers.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Harsh Pay needs location access to discover nearby devices via Bluetooth and Wi-Fi for offline transfers.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>Harsh Pay needs location access to discover nearby devices via Bluetooth and Wi-Fi for offline transfers.</string>
 	<key>NSBonjourServices</key>
 	<array>
 		<string>_harshpay._tcp</string>
