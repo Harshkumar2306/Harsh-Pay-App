@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:harsh_pay/features/home/presentation/manage_vault_sheet.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/network/api_client.dart';
@@ -245,6 +246,7 @@ class _HomeTabState extends State<_HomeTab> {
     if (!mounted) return;
     if (data != null) {
       double cloudBalance = (data['syncedBalance'] as num?)?.toDouble() ?? wallet!.syncedBalance;
+      double offlineVaultBalance = (data['lockedOfflineBalance'] as num?)?.toDouble() ?? wallet!.lockedOfflineBalance;
 
       // In the Two-Way Escrow model, local pending transactions (both credit and debit) 
       // DO NOT affect the available balance. The local balance strictly mirrors the cloud.
@@ -256,6 +258,7 @@ class _HomeTabState extends State<_HomeTab> {
         name: data['name'] ?? wallet!.name,
         email: data['email'] ?? wallet!.email,
         syncedBalance: cloudBalance,
+        lockedOfflineBalance: offlineVaultBalance,
       );
       await HiveSetup.saveWallet(updated);
 
@@ -440,7 +443,7 @@ class _HomeTabState extends State<_HomeTab> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text('Available Balance', style: TextStyle(color: Colors.white70, fontSize: 14, fontWeight: FontWeight.w500)),
+                    const Text('Balances', style: TextStyle(color: Colors.white70, fontSize: 14, fontWeight: FontWeight.w500)),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
@@ -469,22 +472,86 @@ class _HomeTabState extends State<_HomeTab> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 10),
-                Text(
-                  wallet != null ? fmt.format(wallet!.syncedBalance) : '₹ 0.00',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 40,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: -1.5,
+                const SizedBox(height: 16),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text('Main Cloud', style: TextStyle(color: Colors.white70, fontSize: 12)),
+                          const SizedBox(height: 4),
+                          Text(
+                            wallet != null ? fmt.format(wallet!.syncedBalance) : '₹ 0.00',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 28,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: -1.0,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: const [
+                              Icon(Icons.lock_rounded, color: Colors.orangeAccent, size: 12),
+                              SizedBox(width: 4),
+                              Text('Offline Vault', style: TextStyle(color: Colors.orangeAccent, fontSize: 12, fontWeight: FontWeight.bold)),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            wallet != null ? fmt.format(wallet!.lockedOfflineBalance) : '₹ 0.00',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 28,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: -1.0,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                if (_isOnline) ...[
+                  GestureDetector(
+                    onTap: () {
+                      if (wallet != null) {
+                        _showManageVaultSheet(context);
+                      }
+                    },
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+                      ),
+                      child: const Center(
+                        child: Text(
+                          'Manage Offline Vault',
+                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+                        ),
+                      ),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  'Tap sync to refresh from cloud',
-                  style: TextStyle(color: Colors.white.withValues(alpha: 0.55), fontSize: 12),
-                ),
-                const SizedBox(height: 20),
+                  const SizedBox(height: 20),
+                ] else ...[
+                  Text(
+                    'Offline Vault is available for Radio Transfer',
+                    style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 12),
+                  ),
+                  const SizedBox(height: 20),
+                ],
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -653,6 +720,18 @@ class _HomeTabState extends State<_HomeTab> {
             ...recentTxs.map((tx) => _TxTile(tx: tx)).toList()
                 .animate(interval: 80.ms).fadeIn(delay: 450.ms).slideX(begin: 0.08),
         ],
+      ),
+    );
+  }
+
+  void _showManageVaultSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => ManageVaultSheet(
+        wallet: wallet!,
+        onSuccess: _autoSync, // Trigger a cloud sync after success to refresh UI
       ),
     );
   }

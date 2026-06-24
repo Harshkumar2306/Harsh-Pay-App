@@ -78,4 +78,33 @@ class ApiClient {
       return null;
     }
   }
+
+  /// Transfers funds between Main Cloud Account and Offline Vault
+  Future<Map<String, dynamic>?> transferToOfflineVault({
+    required String clerkId,
+    required double amount,
+    required bool toOffline,
+  }) async {
+    try {
+      final response = await _dio.post('/wallet/transfer-offline', data: {
+        'clerkId': clerkId,
+        'amount': amount,
+        'direction': toOffline ? 'to_offline' : 'to_online',
+      });
+
+      if (response.statusCode == 200 && response.data['success'] == true) {
+        return response.data['data']; // Returns {syncedBalance, lockedOfflineBalance}
+      }
+      return {'error': response.data['error'] ?? 'Transfer failed'};
+    } on DioException catch (e) {
+      if (e.response != null && e.response?.data != null) {
+        if (e.response?.data is Map) {
+          return {'error': e.response?.data['error'] ?? 'Transfer failed'};
+        }
+      }
+      return {'error': 'Network error'};
+    } catch (e) {
+      return {'error': 'Unknown error occurred'};
+    }
+  }
 }

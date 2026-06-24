@@ -211,24 +211,24 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
         return;
       }
 
-      if (wallet.syncedBalance < amount) {
-        _showError('Insufficient balance!');
-        return;
-      }
-
       // Check if we are online (with a 2-second timeout to prevent iOS hangs)
       final connectivityResult = await Connectivity().checkConnectivity().timeout(
         const Duration(seconds: 2),
         onTimeout: () => [ConnectivityResult.none],
       );
       final bool isOnline = !connectivityResult.contains(ConnectivityResult.none);
+      final bool isOnlineTransfer = isOnline && !forceOffline;
 
-    // If we are forcing an offline transfer (because we scanned an offline QR), skip online logic entirely!
-    if (isOnline && !forceOffline) {
-      // ───────────────────────────────────────────────
-      // ONLINE MODE — Instant UPI-style cloud payment
-      // ───────────────────────────────────────────────
-      _showLoadingDialog('Paying ₹$amount to ${payload['name']}...');
+      if (isOnlineTransfer) {
+        if (wallet.syncedBalance < amount) {
+          _showError('Insufficient Main Cloud balance!');
+          return;
+        }
+        
+        // ───────────────────────────────────────────────
+        // ONLINE MODE — Instant UPI-style cloud payment
+        // ───────────────────────────────────────────────
+        _showLoadingDialog('Paying ₹$amount to ${payload['name']}...');
 
       final result = await ApiClient().payOnline(
         senderClerkId: wallet.clerkId,
@@ -276,6 +276,10 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
       // ───────────────────────────────────────────────
       // OFFLINE MODE — Local debit, sync later
       // ───────────────────────────────────────────────
+      if (wallet.lockedOfflineBalance < amount) {
+        _showError('Insufficient Offline Vault balance! Go online to lock funds.');
+        return;
+      }
       await _executeOfflineTransfer(wallet, payload, amount);
     }
     } catch (e) {

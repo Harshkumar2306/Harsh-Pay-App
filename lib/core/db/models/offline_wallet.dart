@@ -6,6 +6,7 @@ class OfflineWallet {
   final String name;
   final String email;
   double syncedBalance;
+  double lockedOfflineBalance;
 
   OfflineWallet({
     required this.clerkId,
@@ -13,6 +14,7 @@ class OfflineWallet {
     required this.name,
     required this.email,
     required this.syncedBalance,
+    this.lockedOfflineBalance = 0.0,
   });
 }
 
@@ -28,6 +30,7 @@ class OfflineWalletAdapter extends TypeAdapter<OfflineWallet> {
       name: reader.readString(),
       email: reader.readString(),
       syncedBalance: reader.readDouble(),
+      lockedOfflineBalance: reader.readDouble(),
     );
   }
 
@@ -38,5 +41,6 @@ class OfflineWalletAdapter extends TypeAdapter<OfflineWallet> {
     writer.writeString(obj.name);
     writer.writeString(obj.email);
     writer.writeDouble(obj.syncedBalance);
+    writer.writeDouble(obj.lockedOfflineBalance);
   }
 }

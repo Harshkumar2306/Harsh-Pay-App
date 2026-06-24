@@ -129,8 +129,8 @@ class NearbyTransferService {
     final wallet = HiveSetup.getWallet();
     if (wallet == null) return;
 
-    if (wallet.syncedBalance < amount) {
-      onError?.call('Insufficient offline balance for radio transfer');
+    if (wallet.lockedOfflineBalance < amount) {
+      onError?.call('Insufficient Offline Vault balance! Go online to lock funds.');
       return;
     }
 
