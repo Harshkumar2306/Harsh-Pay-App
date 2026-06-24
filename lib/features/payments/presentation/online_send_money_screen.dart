@@ -204,6 +204,14 @@ class _OnlineSendMoneyScreenState extends State<OnlineSendMoneyScreen> {
         ),
         title: const Text('Send Money', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.qr_code_scanner_rounded, color: Colors.white),
+            onPressed: () => context.push('/qr-scanner'),
+            tooltip: 'Scan QR Code',
+          ),
+          const SizedBox(width: 8),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
